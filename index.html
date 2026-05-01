@@ -17,19 +17,21 @@
     padding: 12px;
 }
 
-/* 🔥 IMAGEN GRANDE */
+/* 🔥 IMAGEN GRANDE TIPO VISOR */
 .popup img {
-    width: 85vw;
-    max-width: 950px;
-    max-height: 75vh;
+    width: 85vw;        /* ocupa casi toda la pantalla */
+    max-width: 950px;   /* límite en PC */
+    max-height: 75vh;   /* evita salir de pantalla */
     object-fit: contain;
     border-radius: 14px;
     display: block;
     margin: 0 auto;
 }
 
+/* textos */
 .popup h4 {
     margin: 6px 0;
+    font-size: 18px;
 }
 
 .popup p {
@@ -37,6 +39,7 @@
     font-size: 14px;
 }
 
+/* botones */
 button {
     margin: 6px;
     padding: 6px 12px;
@@ -52,6 +55,11 @@ button {
 .leaflet-popup-content {
     margin: 0 !important;
     width: auto !important;
+    max-width: none !important;
+}
+
+.leaflet-popup {
+    max-width: none !important;
 }
 </style>
 </head>
@@ -71,24 +79,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// ================= 🔥 CENTRADO REAL =================
-// mueve el popup al centro visual de la pantalla
-function centerPopup(latlng) {
-
-    // primero centra el mapa en el punto
-    map.setView(latlng, map.getZoom(), {
-        animate: true
-    });
-
-    // luego desplaza hacia arriba para centrar visualmente el popup
-    setTimeout(() => {
-        map.panBy([0, -150], { animate: true });
-    }, 150);
-}
-
-// ================= EVENTO GLOBAL =================
+// ================= CENTRADO =================
 map.on('popupopen', function(e) {
-    centerPopup(e.popup.getLatLng());
+    setTimeout(() => {
+        map.panTo(e.popup.getLatLng(), { animate: true });
+    }, 120);
 });
 
 // ================= CARRUSEL =================
@@ -114,7 +109,7 @@ function crearPopup(imagenes, id, titulo) {
     return html;
 }
 
-// ================= UPDATE =================
+// ================= UPDATE (IMPORTANTE FIX) =================
 function update(id) {
     let i = window[`i_${id}`];
     let imgs = window[`imgs_${id}`];
@@ -122,6 +117,18 @@ function update(id) {
     document.getElementById(`img_${id}`).src = imgs[i].ruta;
     document.getElementById(`desc_${id}`).innerText = imgs[i].desc;
     document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
+
+    // 🔥 fuerza reajuste del popup
+    setTimeout(() => {
+        let popup = document.querySelector(".leaflet-popup");
+        if (popup) {
+            popup.style.display = "none";
+            popup.offsetHeight; // force reflow
+            popup.style.display = "";
+
+            map.invalidateSize();
+        }
+    }, 50);
 }
 
 // ================= NEXT / PREV =================
