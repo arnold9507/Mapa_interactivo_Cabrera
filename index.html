@@ -9,26 +9,33 @@
 <style>
 #map { height: 100vh; }
 
-/* 🔥 POPUP SE AJUSTA AL CONTENIDO */
+/* =========================
+   🔥 POPUP BASE FLEXIBLE
+========================= */
 .popup {
+    display: inline-block;
     text-align: center;
     font-family: Arial;
-    display: inline-block;   /* clave para auto-size */
     padding: 10px;
+    max-width: 90vw;
 }
 
-/* 🔥 IMAGEN DOMINA EL TAMAÑO DEL POPUP */
+/* =========================
+   🔥 IMAGEN CONTROLA EL POPUP
+========================= */
 .popup img {
-    width: 480px;        /* ajusta aquí el tamaño global */
-    max-width: 85vw;     /* responsive en celular */
-    height: auto;
+    width: 100%;
+    max-width: 650px;     /* tamaño máximo “pro” */
+    max-height: 70vh;     /* evita que salga de pantalla */
+    object-fit: contain;  /* no recorta */
     border-radius: 14px;
     display: block;
     margin: 0 auto;
 }
 
+/* textos */
 .popup h4 {
-    margin: 6px 0;
+    margin: 8px 0 4px 0;
     font-size: 18px;
 }
 
@@ -37,16 +44,30 @@
     font-size: 14px;
 }
 
+/* botones */
 button {
-    margin: 5px;
+    margin: 6px;
     padding: 6px 12px;
     cursor: pointer;
 }
 
-/* 🔥 EVITA RESTRICCIÓN DE LEAFLET */
+/* =========================
+   🔥 CLAVE: OVERRIDE LEAFLET
+========================= */
+.leaflet-popup-content-wrapper {
+    padding: 0 !important;
+    border-radius: 14px;
+}
+
 .leaflet-popup-content {
-    margin: 10px !important;
+    margin: 0 !important;
     width: auto !important;
+    max-width: none !important;
+}
+
+/* sombra más limpia */
+.leaflet-popup {
+    max-width: none !important;
 }
 </style>
 </head>
@@ -59,20 +80,23 @@ button {
 
 <script>
 
-// ---------------- MAPA ----------------
+// ================= MAPA =================
 var map = L.map('map').setView([3.9863, -74.4834], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// 🔥 CENTRAR POPUP VISUALMENTE
+// ================= CENTRADO REAL =================
 map.on('popupopen', function(e) {
-    e.popup.update();
-    map.panBy([0, -120], { animate: true });
+    setTimeout(() => {
+        map.panTo(e.popup.getLatLng(), {
+            animate: true
+        });
+    }, 120);
 });
 
-// ---------------- CARRUSEL ----------------
+// ================= CARRUSEL =================
 function crearPopup(imagenes, id, titulo) {
 
     let html = `
@@ -95,7 +119,7 @@ function crearPopup(imagenes, id, titulo) {
     return html;
 }
 
-// ---------------- UPDATE ----------------
+// ================= UPDATE =================
 function update(id) {
     let i = window[`i_${id}`];
     let imgs = window[`imgs_${id}`];
@@ -105,7 +129,7 @@ function update(id) {
     document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
 }
 
-// ---------------- NEXT / PREV ----------------
+// ================= NEXT / PREV =================
 function next(id) {
     window[`i_${id}`] = (window[`i_${id}`] + 1) % window[`imgs_${id}`].length;
     update(id);
@@ -116,12 +140,10 @@ function prev(id) {
     update(id);
 }
 
-// =====================================================
-// 🔥 GITHUB BASE
-// =====================================================
+// ================= GITHUB BASE =================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 
-// ---------------- PUNTO 1 ----------------
+// ================= PUNTO 1 =================
 var imgs_p1 = [
     {ruta: base + "cab.jpg", desc: "Parque central"},
     {ruta: base + "monta4.jpg", desc: "Pueblo"},
@@ -132,7 +154,7 @@ L.marker([3.9863, -74.4834])
 .addTo(map)
 .bindPopup(crearPopup(imgs_p1, "p1", "Punto 1"));
 
-// ---------------- PUNTO 2 ----------------
+// ================= PUNTO 2 =================
 var imgs_p2 = [
     {ruta: base + "monta1.jpg", desc: "Perrito"},
     {ruta: base + "monta2.jpg", desc: "Paisaje"},
@@ -146,7 +168,7 @@ L.marker([3.9840, -74.4884])
 .addTo(map)
 .bindPopup(crearPopup(imgs_p2, "p2", "Punto 2"));
 
-// ---------------- PUNTO 3 ----------------
+// ================= PUNTO 3 =================
 var imgs_p3 = [
     {ruta: base + "flor1.jpg", desc: "Flor"},
     {ruta: base + "flor2.jpg", desc: "Orquídea"}
