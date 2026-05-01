@@ -168,7 +168,7 @@ L.marker([3.9708, -74.4736])
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
 // --- CABRERA ---
-fetch(vectorBase + "cabrera.geojson")
+fetch(vectorBase + "cabrera_cundinamarca.geojson")
 .then(res => res.json())
 .then(data => {
     L.geoJSON(data, {
