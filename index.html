@@ -27,26 +27,43 @@
     margin: 0 auto;
 }
 
+.popup h4 { margin: 6px 0; }
+.popup p { margin: 6px 0; font-size: 14px; }
+
 button {
     margin: 6px;
     padding: 6px 12px;
     cursor: pointer;
 }
 
+/* ================= LEAFLET FIX ================= */
+.leaflet-popup-content-wrapper {
+    padding: 0 !important;
+    border-radius: 14px;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    width: auto !important;
+}
+
+.leaflet-popup {
+    max-width: none !important;
+}
+
 /* ================= LEYENDA ================= */
 .legend {
     background: white;
-    padding: 10px 12px;
+    padding: 10px;
     font-family: Arial;
-    font-size: 14px;
+    font-size: 13px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    line-height: 22px;
 }
 
 .legend i {
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
     float: left;
     margin-right: 8px;
     opacity: 0.8;
@@ -69,34 +86,110 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// ================= LEYENDA =================
-var legend = L.control({position: 'bottomright'});
+// ================= CENTRADO POPUP =================
+map.on('popupopen', function(e) {
+    setTimeout(() => {
+        map.panTo(e.popup.getLatLng(), { animate: true });
+    }, 120);
+});
 
-legend.onAdd = function (map) {
+// ================= CARRUSEL =================
+function crearPopup(imagenes, id, titulo) {
 
-    var div = L.DomUtil.create('div', 'legend');
+    let html = `
+    <div class="popup">
+        <h4>${titulo}</h4>
 
-    div.innerHTML += "<b>Leyenda</b><br><br>";
+        <img id="img_${id}" src="${imagenes[0].ruta}">
+        <p id="desc_${id}">${imagenes[0].desc}</p>
 
-    div.innerHTML +=
-        '<i style="background:#2b8cbe"></i> Cabrera<br>';
+        <button onclick="prev('${id}')">◀</button>
+        <button onclick="next('${id}')">▶</button>
 
-    div.innerHTML +=
-        '<i style="background:#31a354"></i> Reserva Campesina<br>';
+        <p id="count_${id}">1 / ${imagenes.length}</p>
+    </div>
+    `;
 
-    return div;
-};
+    window[`imgs_${id}`] = imagenes;
+    window[`i_${id}`] = 0;
 
-legend.addTo(map);
+    return html;
+}
 
-// ================= GITHUB VECTOR =================
+// ================= UPDATE =================
+function update(id) {
+    let i = window[`i_${id}`];
+    let imgs = window[`imgs_${id}`];
+
+    document.getElementById(`img_${id}`).src = imgs[i].ruta;
+    document.getElementById(`desc_${id}`).innerText = imgs[i].desc;
+    document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
+
+    setTimeout(() => {
+        let popup = document.querySelector(".leaflet-popup");
+        if (popup) {
+            popup.style.display = "none";
+            popup.offsetHeight;
+            popup.style.display = "";
+            map.invalidateSize();
+        }
+    }, 50);
+}
+
+// ================= NEXT / PREV =================
+function next(id) {
+    window[`i_${id}`] = (window[`i_${id}`] + 1) % window[`imgs_${id}`].length;
+    update(id);
+}
+
+function prev(id) {
+    window[`i_${id}`] = (window[`i_${id}`] - 1 + window[`imgs_${id}`].length) % window[`imgs_${id}`].length;
+    update(id);
+}
+
+// ================= BASE =================
+const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
-// ================= CABRERA =================
-fetch(vectorBase + "cabrera.geojson")
-.then(res => res.json())
-.then(data => {
+// ================= PUNTOS =================
+var imgs_p1 = [
+    {ruta: base + "cab.jpg", desc: "Parque central"},
+    {ruta: base + "monta4.jpg", desc: "Pueblo"},
+    {ruta: base + "pana.jpg", desc: "Escuela"}
+];
 
+L.marker([3.9863, -74.4834])
+.addTo(map)
+.bindPopup(crearPopup(imgs_p1, "p1", "Punto 1"));
+
+var imgs_p2 = [
+    {ruta: base + "monta1.jpg", desc: "Perrito"},
+    {ruta: base + "monta2.jpg", desc: "Paisaje"},
+    {ruta: base + "monta3.jpg", desc: "Insecto"},
+    {ruta: base + "monta4.jpg", desc: "Pueblo"},
+    {ruta: base + "monta5.jpg", desc: "Vereda"},
+    {ruta: base + "monta6.jpg", desc: "Río"}
+];
+
+L.marker([3.9840, -74.4884])
+.addTo(map)
+.bindPopup(crearPopup(imgs_p2, "p2", "Punto 2"));
+
+var imgs_p3 = [
+    {ruta: base + "flor1.jpg", desc: "Flor"},
+    {ruta: base + "flor2.jpg", desc: "Orquídea"}
+];
+
+L.marker([3.9708, -74.4736])
+.addTo(map)
+.bindPopup(crearPopup(imgs_p3, "p3", "Punto 3"));
+
+// ================= GEOJSON =================
+
+// Cabrera
+fetch(vectorBase + "cabrera.geojson")
+.then(r => r.json())
+.then(data => {
     L.geoJSON(data, {
         style: {
             color: "#2b8cbe",
@@ -104,14 +197,12 @@ fetch(vectorBase + "cabrera.geojson")
             fillOpacity: 0.25
         }
     }).addTo(map);
-
 });
 
-// ================= RESERVA CAMPESINA =================
-fetch(vectorBase + "reserva_campesina_cabrera.geojson")
-.then(res => res.json())
+// Reserva campesina
+fetch(vectorBase + "reserva_campesina.geojson")
+.then(r => r.json())
 .then(data => {
-
     L.geoJSON(data, {
         style: {
             color: "#31a354",
@@ -119,8 +210,22 @@ fetch(vectorBase + "reserva_campesina_cabrera.geojson")
             fillOpacity: 0.25
         }
     }).addTo(map);
-
 });
+
+// ================= LEYENDA =================
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function () {
+    var div = L.DomUtil.create('div', 'legend');
+
+    div.innerHTML += "<b>Leyenda</b><br><br>";
+    div.innerHTML += '<i style="background:#2b8cbe"></i> Cabrera<br>';
+    div.innerHTML += '<i style="background:#31a354"></i> Reserva Campesina<br>';
+
+    return div;
+};
+
+legend.addTo(map);
 
 </script>
 
