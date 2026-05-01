@@ -27,8 +27,15 @@
     margin: 0 auto;
 }
 
-.popup h4 { margin: 6px 0; }
-.popup p { margin: 6px 0; font-size: 14px; }
+.popup h4 {
+    margin: 6px 0;
+    font-size: 18px;
+}
+
+.popup p {
+    margin: 6px 0;
+    font-size: 14px;
+}
 
 button {
     margin: 6px;
@@ -50,24 +57,6 @@ button {
 .leaflet-popup {
     max-width: none !important;
 }
-
-/* ================= LEYENDA ================= */
-.legend {
-    background: white;
-    padding: 10px;
-    font-family: Arial;
-    font-size: 13px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-
-.legend i {
-    width: 15px;
-    height: 15px;
-    float: left;
-    margin-right: 8px;
-    opacity: 0.8;
-}
 </style>
 </head>
 
@@ -86,7 +75,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// ================= CENTRADO POPUP =================
+// ================= CENTRADO =================
 map.on('popupopen', function(e) {
     setTimeout(() => {
         map.panTo(e.popup.getLatLng(), { animate: true });
@@ -124,16 +113,6 @@ function update(id) {
     document.getElementById(`img_${id}`).src = imgs[i].ruta;
     document.getElementById(`desc_${id}`).innerText = imgs[i].desc;
     document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
-
-    setTimeout(() => {
-        let popup = document.querySelector(".leaflet-popup");
-        if (popup) {
-            popup.style.display = "none";
-            popup.offsetHeight;
-            popup.style.display = "";
-            map.invalidateSize();
-        }
-    }, 50);
 }
 
 // ================= NEXT / PREV =================
@@ -147,11 +126,10 @@ function prev(id) {
     update(id);
 }
 
-// ================= BASE =================
+// ================= BASE IMÁGENES =================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
-const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
-// ================= PUNTOS =================
+// ================= PUNTO 1 =================
 var imgs_p1 = [
     {ruta: base + "cab.jpg", desc: "Parque central"},
     {ruta: base + "monta4.jpg", desc: "Pueblo"},
@@ -162,6 +140,7 @@ L.marker([3.9863, -74.4834])
 .addTo(map)
 .bindPopup(crearPopup(imgs_p1, "p1", "Punto 1"));
 
+// ================= PUNTO 2 =================
 var imgs_p2 = [
     {ruta: base + "monta1.jpg", desc: "Perrito"},
     {ruta: base + "monta2.jpg", desc: "Paisaje"},
@@ -175,6 +154,7 @@ L.marker([3.9840, -74.4884])
 .addTo(map)
 .bindPopup(crearPopup(imgs_p2, "p2", "Punto 2"));
 
+// ================= PUNTO 3 =================
 var imgs_p3 = [
     {ruta: base + "flor1.jpg", desc: "Flor"},
     {ruta: base + "flor2.jpg", desc: "Orquídea"}
@@ -185,10 +165,11 @@ L.marker([3.9708, -74.4736])
 .bindPopup(crearPopup(imgs_p3, "p3", "Punto 3"));
 
 // ================= GEOJSON =================
+const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
-// Cabrera
+// --- CABRERA ---
 fetch(vectorBase + "cabrera.geojson")
-.then(r => r.json())
+.then(res => res.json())
 .then(data => {
     L.geoJSON(data, {
         style: {
@@ -197,11 +178,12 @@ fetch(vectorBase + "cabrera.geojson")
             fillOpacity: 0.25
         }
     }).addTo(map);
-});
+})
+.catch(err => console.log("Error cargando cabrera.geojson", err));
 
-// Reserva campesina
+// --- RESERVA CAMPESINA ---
 fetch(vectorBase + "reserva_campesina.geojson")
-.then(r => r.json())
+.then(res => res.json())
 .then(data => {
     L.geoJSON(data, {
         style: {
@@ -210,22 +192,8 @@ fetch(vectorBase + "reserva_campesina.geojson")
             fillOpacity: 0.25
         }
     }).addTo(map);
-});
-
-// ================= LEYENDA =================
-var legend = L.control({position: 'bottomright'});
-
-legend.onAdd = function () {
-    var div = L.DomUtil.create('div', 'legend');
-
-    div.innerHTML += "<b>Leyenda</b><br><br>";
-    div.innerHTML += '<i style="background:#2b8cbe"></i> Cabrera<br>';
-    div.innerHTML += '<i style="background:#31a354"></i> Reserva Campesina<br>';
-
-    return div;
-};
-
-legend.addTo(map);
+})
+.catch(err => console.log("Error cargando reserva_campesina.geojson", err));
 
 </script>
 
