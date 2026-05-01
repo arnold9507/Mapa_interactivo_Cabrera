@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Mapa interactivo</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+#map { height: 100vh; }
+
+/* 🔥 POPUP GRANDE TIPO APP */
+.popup {
+    text-align: center;
+    font-family: Arial;
+    width: 520px;
+}
+
+/* 🔥 IMAGEN GRANDE Y SIN CORTES */
+.popup img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+    border-radius: 14px;
+}
+
+.popup h4 {
+    margin: 6px 0;
+    font-size: 18px;
+}
+
+.popup p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+button {
+    margin: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+// ---------------- MAPA ----------------
+var map = L.map('map').setView([3.9863, -74.4834], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+// 🔥 CENTRAR POPUPS AUTOMÁTICAMENTE
+map.on('popupopen', function() {
+    map.panBy([0, -120], { animate: true });
+});
+
+// ---------------- CARRUSEL ----------------
+function crearPopup(imagenes, id, titulo) {
+
+    let html = `
+    <div class="popup">
+        <h4>${titulo}</h4>
+
+        <img id="img_${id}" src="${imagenes[0].ruta}">
+        <p id="desc_${id}">${imagenes[0].desc}</p>
+
+        <button onclick="prev('${id}')">◀</button>
+        <button onclick="next('${id}')">▶</button>
+
+        <p id="count_${id}">1 / ${imagenes.length}</p>
+    </div>
+    `;
+
+    window[`imgs_${id}`] = imagenes;
+    window[`i_${id}`] = 0;
+
+    return html;
+}
+
+// ---------------- UPDATE ----------------
+function update(id) {
+    let i = window[`i_${id}`];
+    let imgs = window[`imgs_${id}`];
+
+    document.getElementById(`img_${id}`).src = imgs[i].ruta;
+    document.getElementById(`desc_${id}`).innerText = imgs[i].desc;
+    document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
+}
+
+// ---------------- NEXT / PREV ----------------
+function next(id) {
+    window[`i_${id}`] = (window[`i_${id}`] + 1) % window[`imgs_${id}`].length;
+    update(id);
+}
+
+function prev(id) {
+    window[`i_${id}`] = (window[`i_${id}`] - 1 + window[`imgs_${id}`].length) % window[`imgs_${id}`].length;
+    update(id);
+}
+
+// =====================================================
+// 🔥 URL BASE GITHUB
+// =====================================================
+const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
+
+// ---------------- PUNTO 1 ----------------
+var imgs_p1 = [
+    {ruta: base + "cab.jpg", desc: "Parque central"},
+    {ruta: base + "monta4.jpg", desc: "Pueblo"},
+    {ruta: base + "pana.jpg", desc: "Escuela"}
+];
+
+var marker1 = L.marker([3.9863, -74.4834]).addTo(map);
+
+marker1.bindPopup(crearPopup(imgs_p1, "p1", "Punto 1"));
+
+// ---------------- PUNTO 2 ----------------
+var imgs_p2 = [
+    {ruta: base + "monta1.jpg", desc: "Perrito"},
+    {ruta: base + "monta2.jpg", desc: "Paisaje"},
+    {ruta: base + "monta3.jpg", desc: "Insecto"},
+    {ruta: base + "monta4.jpg", desc: "Pueblo"},
+    {ruta: base + "monta5.jpg", desc: "Vereda"},
+    {ruta: base + "monta6.jpg", desc: "Río"}
+];
+
+var marker2 = L.marker([3.9840, -74.4884]).addTo(map);
+
+marker2.bindPopup(crearPopup(imgs_p2, "p2", "Punto 2"));
+
+// ---------------- PUNTO 3 ----------------
+var imgs_p3 = [
+    {ruta: base + "flor1.jpg", desc: "Flor"},
+    {ruta: base + "flor2.jpg", desc: "Orquídea"}
+];
+
+var marker3 = L.marker([3.9708, -74.4736]).addTo(map);
+
+marker3.bindPopup(crearPopup(imgs_p3, "p3", "Punto 3"));
+
+</script>
+
+</body>
+</html>
