@@ -182,7 +182,7 @@ fetch(vectorBase + "cabrera.geojson")
 .catch(err => console.log("Error cargando cabrera.geojson", err));
 
 // --- RESERVA CAMPESINA ---
-fetch(vectorBase + "reserva_campesina.geojson")
+fetch(vectorBase + "reserva_campesina_cabrera.geojson")
 .then(res => res.json())
 .then(data => {
     L.geoJSON(data, {
