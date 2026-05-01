@@ -17,21 +17,19 @@
     padding: 12px;
 }
 
-/* 🔥 IMAGEN GRANDE TIPO VISOR */
+/* 🔥 IMAGEN GRANDE */
 .popup img {
-    width: 85vw;        /* ocupa casi toda la pantalla */
-    max-width: 950px;   /* límite en PC */
-    max-height: 75vh;   /* evita salir de pantalla */
+    width: 85vw;
+    max-width: 950px;
+    max-height: 75vh;
     object-fit: contain;
     border-radius: 14px;
     display: block;
     margin: 0 auto;
 }
 
-/* textos */
 .popup h4 {
     margin: 6px 0;
-    font-size: 18px;
 }
 
 .popup p {
@@ -39,7 +37,6 @@
     font-size: 14px;
 }
 
-/* botones */
 button {
     margin: 6px;
     padding: 6px 12px;
@@ -55,7 +52,6 @@ button {
 .leaflet-popup-content {
     margin: 0 !important;
     width: auto !important;
-    max-width: none !important;
 }
 
 .leaflet-popup {
@@ -109,7 +105,7 @@ function crearPopup(imagenes, id, titulo) {
     return html;
 }
 
-// ================= UPDATE (IMPORTANTE FIX) =================
+// ================= UPDATE =================
 function update(id) {
     let i = window[`i_${id}`];
     let imgs = window[`imgs_${id}`];
@@ -118,14 +114,12 @@ function update(id) {
     document.getElementById(`desc_${id}`).innerText = imgs[i].desc;
     document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
 
-    // 🔥 fuerza reajuste del popup
     setTimeout(() => {
         let popup = document.querySelector(".leaflet-popup");
         if (popup) {
             popup.style.display = "none";
-            popup.offsetHeight; // force reflow
+            popup.offsetHeight;
             popup.style.display = "";
-
             map.invalidateSize();
         }
     }, 50);
@@ -145,7 +139,7 @@ function prev(id) {
 // ================= GITHUB BASE =================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 
-// ================= PUNTO 1 =================
+// ================= PUNTOS =================
 var imgs_p1 = [
     {ruta: base + "cab.jpg", desc: "Parque central"},
     {ruta: base + "monta4.jpg", desc: "Pueblo"},
@@ -156,7 +150,7 @@ L.marker([3.9863, -74.4834])
 .addTo(map)
 .bindPopup(crearPopup(imgs_p1, "p1", "Punto 1"));
 
-// ================= PUNTO 2 =================
+// ---------------- PUNTO 2 ----------------
 var imgs_p2 = [
     {ruta: base + "monta1.jpg", desc: "Perrito"},
     {ruta: base + "monta2.jpg", desc: "Paisaje"},
@@ -170,7 +164,7 @@ L.marker([3.9840, -74.4884])
 .addTo(map)
 .bindPopup(crearPopup(imgs_p2, "p2", "Punto 2"));
 
-// ================= PUNTO 3 =================
+// ---------------- PUNTO 3 ----------------
 var imgs_p3 = [
     {ruta: base + "flor1.jpg", desc: "Flor"},
     {ruta: base + "flor2.jpg", desc: "Orquídea"}
@@ -179,6 +173,51 @@ var imgs_p3 = [
 L.marker([3.9708, -74.4736])
 .addTo(map)
 .bindPopup(crearPopup(imgs_p3, "p3", "Punto 3"));
+
+// ================= 🔥 GEOJSON CAPAS =================
+
+// URL base vectorial
+const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
+
+// --- CABRERA GEOJSON ---
+fetch(vectorBase + "cabrera.geojson")
+.then(res => res.json())
+.then(data => {
+
+    L.geoJSON(data, {
+        style: {
+            color: "#2b8cbe",
+            weight: 2,
+            fillOpacity: 0.2
+        },
+        onEachFeature: function (feature, layer) {
+            if (feature.properties && feature.properties.name) {
+                layer.bindPopup("<b>" + feature.properties.name + "</b>");
+            }
+        }
+    }).addTo(map);
+
+});
+
+// --- RESERVA CAMPESINA ---
+fetch(vectorBase + "reserva_campesina_cabrera.geojson")
+.then(res => res.json())
+.then(data => {
+
+    L.geoJSON(data, {
+        style: {
+            color: "#31a354",
+            weight: 2,
+            fillOpacity: 0.25
+        },
+        onEachFeature: function (feature, layer) {
+            if (feature.properties && feature.properties.name) {
+                layer.bindPopup("<b>" + feature.properties.name + "</b>");
+            }
+        }
+    }).addTo(map);
+
+});
 
 </script>
 
