@@ -28,8 +28,14 @@
     margin: 0 auto;
 }
 
-.popup h4 { margin: 6px 0; }
-.popup p { margin: 6px 0; font-size: 14px; }
+.popup h4 {
+    margin: 6px 0;
+}
+
+.popup p {
+    margin: 6px 0;
+    font-size: 14px;
+}
 
 button {
     margin: 6px;
@@ -65,11 +71,31 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
+// ================= 🔥 CENTRADO REAL =================
+// mueve el popup al centro visual de la pantalla
+function centerPopup(latlng) {
+
+    // primero centra el mapa en el punto
+    map.setView(latlng, map.getZoom(), {
+        animate: true
+    });
+
+    // luego desplaza hacia arriba para centrar visualmente el popup
+    setTimeout(() => {
+        map.panBy([0, -150], { animate: true });
+    }, 150);
+}
+
+// ================= EVENTO GLOBAL =================
+map.on('popupopen', function(e) {
+    centerPopup(e.popup.getLatLng());
+});
+
 // ================= CARRUSEL =================
 function crearPopup(imagenes, id, titulo) {
 
     let html = `
-    <div class="popup" id="popup_${id}">
+    <div class="popup">
         <h4>${titulo}</h4>
 
         <img id="img_${id}" src="${imagenes[0].ruta}">
@@ -109,43 +135,7 @@ function prev(id) {
     update(id);
 }
 
-// ================= 🔥 CENTRADO REAL DEL POPUP =================
-function centerPopup(latlng) {
-
-    map.setView(latlng, map.getZoom(), { animate: true });
-
-    setTimeout(() => {
-
-        let popup = document.querySelector(".leaflet-popup");
-        if (!popup) return;
-
-        // tamaño real del popup
-        let rect = popup.getBoundingClientRect();
-
-        // centro de pantalla
-        let centerX = window.innerWidth / 2;
-        let centerY = window.innerHeight / 2;
-
-        // centro del popup
-        let popupCenterX = rect.left + rect.width / 2;
-        let popupCenterY = rect.top + rect.height / 2;
-
-        // diferencia
-        let offsetX = centerX - popupCenterX;
-        let offsetY = centerY - popupCenterY;
-
-        // mover mapa para centrar popup
-        map.panBy([offsetX, offsetY], { animate: true });
-
-    }, 200);
-}
-
-// ================= EVENTO GLOBAL =================
-map.on('popupopen', function(e) {
-    centerPopup(e.popup.getLatLng());
-});
-
-// ================= BASE GITHUB =================
+// ================= GITHUB BASE =================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 
 // ================= PUNTO 1 =================
