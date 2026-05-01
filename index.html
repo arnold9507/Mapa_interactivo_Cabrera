@@ -9,25 +9,20 @@
 <style>
 #map { height: 100vh; }
 
-/* =========================
-   🔥 POPUP BASE FLEXIBLE
-========================= */
+/* ================= POPUP ================= */
 .popup {
     display: inline-block;
     text-align: center;
     font-family: Arial;
     padding: 10px;
-    max-width: 90vw;
 }
 
-/* =========================
-   🔥 IMAGEN CONTROLA EL POPUP
-========================= */
+/* 🔥 la imagen controla el tamaño */
 .popup img {
     width: 100%;
-    max-width: 650px;     /* tamaño máximo “pro” */
-    max-height: 70vh;     /* evita que salga de pantalla */
-    object-fit: contain;  /* no recorta */
+    max-width: 650px;
+    max-height: 70vh;
+    object-fit: contain;
     border-radius: 14px;
     display: block;
     margin: 0 auto;
@@ -35,25 +30,21 @@
 
 /* textos */
 .popup h4 {
-    margin: 8px 0 4px 0;
-    font-size: 18px;
+    margin: 6px 0;
 }
 
 .popup p {
-    margin: 6px 0;
+    margin: 5px 0;
     font-size: 14px;
 }
 
-/* botones */
 button {
-    margin: 6px;
+    margin: 5px;
     padding: 6px 12px;
     cursor: pointer;
 }
 
-/* =========================
-   🔥 CLAVE: OVERRIDE LEAFLET
-========================= */
+/* ================= FIX LEAFLET ================= */
 .leaflet-popup-content-wrapper {
     padding: 0 !important;
     border-radius: 14px;
@@ -62,12 +53,6 @@ button {
 .leaflet-popup-content {
     margin: 0 !important;
     width: auto !important;
-    max-width: none !important;
-}
-
-/* sombra más limpia */
-.leaflet-popup {
-    max-width: none !important;
 }
 </style>
 </head>
@@ -87,20 +72,18 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// ================= CENTRADO REAL =================
+// ================= CENTRADO =================
 map.on('popupopen', function(e) {
     setTimeout(() => {
-        map.panTo(e.popup.getLatLng(), {
-            animate: true
-        });
-    }, 120);
+        map.panTo(e.popup.getLatLng(), { animate: true });
+    }, 100);
 });
 
 // ================= CARRUSEL =================
 function crearPopup(imagenes, id, titulo) {
 
     let html = `
-    <div class="popup">
+    <div class="popup" id="popup_${id}">
         <h4>${titulo}</h4>
 
         <img id="img_${id}" src="${imagenes[0].ruta}">
@@ -119,7 +102,7 @@ function crearPopup(imagenes, id, titulo) {
     return html;
 }
 
-// ================= UPDATE =================
+// ================= 🔥 UPDATE CON FIX REAL =================
 function update(id) {
     let i = window[`i_${id}`];
     let imgs = window[`imgs_${id}`];
@@ -127,6 +110,18 @@ function update(id) {
     document.getElementById(`img_${id}`).src = imgs[i].ruta;
     document.getElementById(`desc_${id}`).innerText = imgs[i].desc;
     document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
+
+    // 🔥 CLAVE: forzar recalculo del popup
+    setTimeout(() => {
+        let popup = document.querySelector(".leaflet-popup");
+        if (popup) {
+            popup.style.display = "none";
+            popup.offsetHeight; // force reflow
+            popup.style.display = "";
+
+            map.invalidateSize(); // recalcula Leaflet
+        }
+    }, 50);
 }
 
 // ================= NEXT / PREV =================
@@ -140,7 +135,7 @@ function prev(id) {
     update(id);
 }
 
-// ================= GITHUB BASE =================
+// ================= BASE GITHUB =================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 
 // ================= PUNTO 1 =================
