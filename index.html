@@ -9,19 +9,22 @@
 <style>
 #map { height: 100vh; }
 
-/* 🔥 POPUP GRANDE TIPO APP */
+/* 🔥 POPUP SE AJUSTA AL CONTENIDO */
 .popup {
     text-align: center;
     font-family: Arial;
-    width: 520px;
+    display: inline-block;   /* clave para auto-size */
+    padding: 10px;
 }
 
-/* 🔥 IMAGEN GRANDE Y SIN CORTES */
+/* 🔥 IMAGEN DOMINA EL TAMAÑO DEL POPUP */
 .popup img {
-    width: 100%;
-    max-height: 420px;
-    object-fit: contain;
+    width: 480px;        /* ajusta aquí el tamaño global */
+    max-width: 85vw;     /* responsive en celular */
+    height: auto;
     border-radius: 14px;
+    display: block;
+    margin: 0 auto;
 }
 
 .popup h4 {
@@ -38,6 +41,12 @@ button {
     margin: 5px;
     padding: 6px 12px;
     cursor: pointer;
+}
+
+/* 🔥 EVITA RESTRICCIÓN DE LEAFLET */
+.leaflet-popup-content {
+    margin: 10px !important;
+    width: auto !important;
 }
 </style>
 </head>
@@ -57,8 +66,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// 🔥 CENTRAR POPUPS AUTOMÁTICAMENTE
-map.on('popupopen', function() {
+// 🔥 CENTRAR POPUP VISUALMENTE
+map.on('popupopen', function(e) {
+    e.popup.update();
     map.panBy([0, -120], { animate: true });
 });
 
@@ -107,7 +117,7 @@ function prev(id) {
 }
 
 // =====================================================
-// 🔥 URL BASE GITHUB
+// 🔥 GITHUB BASE
 // =====================================================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 
@@ -118,9 +128,9 @@ var imgs_p1 = [
     {ruta: base + "pana.jpg", desc: "Escuela"}
 ];
 
-var marker1 = L.marker([3.9863, -74.4834]).addTo(map);
-
-marker1.bindPopup(crearPopup(imgs_p1, "p1", "Punto 1"));
+L.marker([3.9863, -74.4834])
+.addTo(map)
+.bindPopup(crearPopup(imgs_p1, "p1", "Punto 1"));
 
 // ---------------- PUNTO 2 ----------------
 var imgs_p2 = [
@@ -132,9 +142,9 @@ var imgs_p2 = [
     {ruta: base + "monta6.jpg", desc: "Río"}
 ];
 
-var marker2 = L.marker([3.9840, -74.4884]).addTo(map);
-
-marker2.bindPopup(crearPopup(imgs_p2, "p2", "Punto 2"));
+L.marker([3.9840, -74.4884])
+.addTo(map)
+.bindPopup(crearPopup(imgs_p2, "p2", "Punto 2"));
 
 // ---------------- PUNTO 3 ----------------
 var imgs_p3 = [
@@ -142,9 +152,9 @@ var imgs_p3 = [
     {ruta: base + "flor2.jpg", desc: "Orquídea"}
 ];
 
-var marker3 = L.marker([3.9708, -74.4736]).addTo(map);
-
-marker3.bindPopup(crearPopup(imgs_p3, "p3", "Punto 3"));
+L.marker([3.9708, -74.4736])
+.addTo(map)
+.bindPopup(crearPopup(imgs_p3, "p3", "Punto 3"));
 
 </script>
 
