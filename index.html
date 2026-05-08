@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Mapa interactivo</title>
+<title>Mapa interactivo - Cabrera</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
@@ -57,6 +57,17 @@ button {
 .leaflet-popup {
     max-width: none !important;
 }
+
+/* Estilo para el control de capas */
+.leaflet-control-layers {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.leaflet-control-layers label {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
 </style>
 </head>
 
@@ -71,7 +82,8 @@ button {
 // ================= MAPA =================
 var map = L.map('map').setView([3.9863, -74.4834], 13);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// Capa base (OpenStreetMap)
+var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
@@ -164,6 +176,14 @@ L.marker([3.9708, -74.4736])
 .addTo(map)
 .bindPopup(crearPopup(imgs_p3, "p3", "Punto 3"));
 
+// ================= CONTROL DE CAPAS =================
+// Crear un objeto para guardar las capas que se puedan activar/desactivar
+var baseMaps = {
+    "OpenStreetMap": osmLayer
+};
+
+var overlayMaps = {};
+
 // ================= GEOJSON =================
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
@@ -171,13 +191,20 @@ const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vector
 fetch(vectorBase + "cabrera_cundinamarca.geojson")
 .then(res => res.json())
 .then(data => {
-    L.geoJSON(data, {
+    var capaCabrera = L.geoJSON(data, {
         style: {
             color: "#2b8cbe",
             weight: 2,
             fillOpacity: 0.25
-        }
+        },
+        name: "Límite de Cabrera"
     }).addTo(map);
+    
+    // Agregar al control de capas
+    overlayMaps["Límite de Cabrera"] = capaCabrera;
+    
+    // Añadir el control al mapa (solo se ejecuta una vez cuando ambas capas están listas)
+    agregarControlCapas();
 })
 .catch(err => console.log("Error cargando cabrera.geojson", err));
 
@@ -185,15 +212,35 @@ fetch(vectorBase + "cabrera_cundinamarca.geojson")
 fetch(vectorBase + "reserva_campesina_cabrera.geojson")
 .then(res => res.json())
 .then(data => {
-    L.geoJSON(data, {
+    var capaReserva = L.geoJSON(data, {
         style: {
             color: "#31a354",
             weight: 2,
             fillOpacity: 0.25
-        }
+        },
+        name: "Reserva Campesina"
     }).addTo(map);
+    
+    // Agregar al control de capas
+    overlayMaps["Reserva Campesina"] = capaReserva;
+    
+    // Añadir el control al mapa
+    agregarControlCapas();
 })
 .catch(err => console.log("Error cargando reserva_campesina.geojson", err));
+
+// Función para añadir el control de capas solo cuando ambas capas estén cargadas
+var controlAgregado = false;
+function agregarControlCapas() {
+    // Verificar que ambas capas existan (tengan al menos una propiedad)
+    if (!controlAgregado && Object.keys(overlayMaps).length === 2) {
+        L.control.layers(baseMaps, overlayMaps, {
+            collapsed: false,  // Para que se vea siempre expandido (opcional)
+            position: 'topright'
+        }).addTo(map);
+        controlAgregado = true;
+    }
+}
 
 </script>
 
