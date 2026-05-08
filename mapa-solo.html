@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Mapa interactivo - Cabrera (Vista completa)</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Mapa ocupa toda la pantalla */
+#map {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* Botón para volver (opcional) */
+.boton-volver {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s;
+}
+
+.boton-volver:hover {
+    background: rgba(0,0,0,0.9);
+    transform: scale(1.05);
+}
+
+/* Mensaje de instrucciones flotante */
+.instrucciones {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+}
+
+/* ================= POPUP ================= */
+.popup {
+    display: inline-block;
+    text-align: center;
+    font-family: Arial;
+    padding: 12px;
+    min-width: 280px;
+}
+
+.popup img {
+    width: 100%;
+    max-width: 400px;
+    max-height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+.popup h4 {
+    margin: 6px 0;
+    font-size: 18px;
+    color: #2b8cbe;
+}
+
+.popup p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+button {
+    margin: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    background: #2b8cbe;
+    color: white;
+    border: none;
+    border-radius: 20px;
+}
+
+/* ================= LEAFLET FIX ================= */
+.leaflet-popup-content-wrapper {
+    padding: 0 !important;
+    border-radius: 14px;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    width: auto !important;
+}
+
+.leaflet-popup {
+    max-width: none !important;
+}
+
+.leaflet-control-layers {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<!-- Botón opcional para volver a la página principal -->
+<a href="index.html" class="boton-volver" target="_self">← Volver al mapa con información</a>
+<div class="instrucciones">
+    🖱️ Haz clic en los marcadores para ver las fotos | 🗺️ Cambia el tipo de mapa en esquina superior derecha
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+// ================= INICIALIZAR MAPA =================
+var map = L.map('map').setView([3.9863, -74.4834], 14);
+
+// ================= MAPAS BASE =================
+// Google Satelital
+var googleSatelite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+    attribution: '&copy; Google Maps',
+    maxZoom: 22,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+}).addTo(map);
+
+// Google Calles
+var googleCalles = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+    attribution: '&copy; Google Maps',
+    maxZoom: 22,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+});
+
+// Google Híbrido
+var googleHibrido = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    attribution: '&copy; Google Maps',
+    maxZoom: 22,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+});
+
+// OpenStreetMap
+var osmCalles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+});
+
+// ================= CARRUSEL =================
+function crearPopup(imagenes, id, titulo) {
+    let html = `
+    <div class="popup">
+        <h4>${titulo}</h4>
+        <img id="img_${id}" src="${imagenes[0].ruta}">
+        <p id="desc_${id}">${imagenes[0].desc}</p>
+        <button onclick="prev('${id}')">◀</button>
+        <button onclick="next('${id}')">▶</button>
+        <p id="count_${id}">1 / ${imagenes.length}</p>
+    </div>
+    `;
+    window[`imgs_${id}`] = imagenes;
+    window[`i_${id}`] = 0;
+    return html;
+}
+
+function update(id) {
+    let i = window[`i_${id}`];
+    let imgs = window[`imgs_${id}`];
+    document.getElementById(`img_${id}`).src = imgs[i].ruta;
+    document.getElementById(`desc_${id}`).innerText = imgs[i].desc;
+    document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
+}
+
+function next(id) {
+    window[`i_${id}`] = (window[`i_${id}`] + 1) % window[`imgs_${id}`].length;
+    update(id);
+}
+
+function prev(id) {
+    window[`i_${id}`] = (window[`i_${id}`] - 1 + window[`imgs_${id}`].length) % window[`imgs_${id}`].length;
+    update(id);
+}
+
+// ================= BASE IMÁGENES =================
+const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
+
+// ================= ICONOS =================
+function crearIcono(color, nombre) {
+    return L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="background-color: ${color}; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-weight: bold; color: white; font-size: 18px;">
+                    ${nombre}
+                </div>`,
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -18]
+    });
+}
+
+var iconoPunto1 = crearIcono('#2b8cbe', '★');
+var iconoPunto2 = crearIcono('#31a354', '🌲');
+var iconoPunto3 = crearIcono('#e6550d', '🌸');
+
+// ================= PUNTO 1 =================
+var imgs_p1 = [
+    {ruta: base + "cab.jpg", desc: "Parque central"},
+    {ruta: base + "monta4.jpg", desc: "Pueblo"},
+    {ruta: base + "pana.jpg", desc: "Escuela"}
+];
+
+L.marker([3.9863, -74.4834], { icon: iconoPunto1 })
+.addTo(map)
+.bindPopup(crearPopup(imgs_p1, "p1", "🏙️ Punto 1 - Centro"));
+
+// ================= PUNTO 2 =================
+var imgs_p2 = [
+    {ruta: base + "monta1.jpg", desc: "Perrito"},
+    {ruta: base + "monta2.jpg", desc: "Paisaje"},
+    {ruta: base + "monta3.jpg", desc: "Insecto"},
+    {ruta: base + "monta4.jpg", desc: "Pueblo"},
+    {ruta: base + "monta5.jpg", desc: "Vereda"},
+    {ruta: base + "monta6.jpg", desc: "Río"}
+];
+
+L.marker([3.9840, -74.4884], { icon: iconoPunto2 })
+.addTo(map)
+.bindPopup(crearPopup(imgs_p2, "p2", "🌳 Punto 2 - Zona Rural"));
+
+// ================= PUNTO 3 =================
+var imgs_p3 = [
+    {ruta: base + "flor1.jpg", desc: "Flor"},
+    {ruta: base + "flor2.jpg", desc: "Orquídea"}
+];
+
+L.marker([3.9708, -74.4736], { icon: iconoPunto3 })
+.addTo(map)
+.bindPopup(crearPopup(imgs_p3, "p3", "🌸 Punto 3 - Naturaleza"));
+
+// ================= CAPAS =================
+var baseMaps = {
+    "🛰️ Google Satélite": googleSatelite,
+    "🗺️ Google Calles": googleCalles,
+    "🌍 Google Híbrido": googleHibrido,
+    "🗺️ OpenStreetMap": osmCalles
+};
+
+var overlayMaps = {};
+
+// ================= GEOJSON =================
+const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
+
+fetch(vectorBase + "cabrera_cundinamarca.geojson")
+.then(res => res.json())
+.then(data => {
+    var capaCabrera = L.geoJSON(data, {
+        style: { color: "#2b8cbe", weight: 2, fillOpacity: 0.2 }
+    }).addTo(map);
+    overlayMaps["📍 Límite de Cabrera"] = capaCabrera;
+    agregarControlCapas();
+})
+.catch(err => console.log("Error", err));
+
+fetch(vectorBase + "reserva_campesina_cabrera.geojson")
+.then(res => res.json())
+.then(data => {
+    var capaReserva = L.geoJSON(data, {
+        style: { color: "#31a354", weight: 2, fillOpacity: 0.2 }
+    }).addTo(map);
+    overlayMaps["🌾 Reserva Campesina"] = capaReserva;
+    agregarControlCapas();
+})
+.catch(err => console.log("Error", err));
+
+var controlAgregado = false;
+function agregarControlCapas() {
+    if (!controlAgregado && Object.keys(overlayMaps).length === 2) {
+        L.control.layers(baseMaps, overlayMaps, {
+            collapsed: false,
+            position: 'topright'
+        }).addTo(map);
+        controlAgregado = true;
+    }
+}
+
+console.log("✅ Mapa en pantalla completa - Cargado");
+
+</script>
+
+</body>
+</html>
