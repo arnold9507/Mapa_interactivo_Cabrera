@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Mapa interactivo - Cabrera (Satelital)</title>
+<title>Mapa interactivo - Cabrera (Marcadores personalizados)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
@@ -80,13 +80,13 @@ button {
 <script>
 
 // ================= MAPA BASE (SATELITAL POR DEFECTO) =================
-var map = L.map('map').setView([3.9863, -74.4834], 11);
+var map = L.map('map').setView([3.9863, -74.4834], 13);
 
-// Capa satelital (Esri World Imagery - recomendada)
+// Capa satelital (Esri World Imagery)
 var sateliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    attribution: 'Tiles &copy; Esri',
     maxZoom: 19
-}).addTo(map);  // ← Este se añade por defecto
+}).addTo(map);
 
 // Capa callejera (OpenStreetMap)
 var callejeroLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -152,18 +152,54 @@ function prev(id) {
 // ================= BASE IMÁGENES =================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 
-// ================= PUNTO 1 =================
+// ================= CREAR MARCADORES PERSONALIZADOS =================
+// Función para crear iconos personalizados
+function crearIcono(color, nombre) {
+    return L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="background-color: ${color}; 
+                          width: 32px; 
+                          height: 32px; 
+                          border-radius: 50%; 
+                          display: flex; 
+                          align-items: center; 
+                          justify-content: center;
+                          border: 3px solid white;
+                          box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                          font-weight: bold;
+                          color: white;
+                          font-size: 16px;
+                          font-family: Arial;">
+                    ${nombre}
+                </div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -16]
+    });
+}
+
+// Crear diferentes iconos para cada punto
+var iconoPunto1 = crearIcono('#2b8cbe', '★');  // Azul con estrella
+var iconoPunto2 = crearIcono('#31a354', '🌲');  // Verde con árbol
+var iconoPunto3 = crearIcono('#e6550d', '🌸');  // Naranja con flor
+
+// Opcional: Versión con números en lugar de emojis
+// var iconoPunto1 = crearIcono('#2b8cbe', '1');
+// var iconoPunto2 = crearIcono('#31a354', '2');
+// var iconoPunto3 = crearIcono('#e6550d', '3');
+
+// ================= PUNTO 1 (Centro - Azul) =================
 var imgs_p1 = [
     {ruta: base + "cab.jpg", desc: "Parque central"},
     {ruta: base + "monta4.jpg", desc: "Pueblo"},
     {ruta: base + "pana.jpg", desc: "Escuela"}
 ];
 
-L.marker([3.9863, -74.4834])
+L.marker([3.9863, -74.4834], { icon: iconoPunto1 })
 .addTo(map)
-.bindPopup(crearPopup(imgs_p1, "p1", "Punto 1 - Centro"));
+.bindPopup(crearPopup(imgs_p1, "p1", "🏙️ Punto 1 - Centro"));
 
-// ================= PUNTO 2 =================
+// ================= PUNTO 2 (Zona Rural - Verde) =================
 var imgs_p2 = [
     {ruta: base + "monta1.jpg", desc: "Perrito"},
     {ruta: base + "monta2.jpg", desc: "Paisaje"},
@@ -173,29 +209,27 @@ var imgs_p2 = [
     {ruta: base + "monta6.jpg", desc: "Río"}
 ];
 
-L.marker([3.9840, -74.4884])
+L.marker([3.9840, -74.4884], { icon: iconoPunto2 })
 .addTo(map)
-.bindPopup(crearPopup(imgs_p2, "p2", "Punto 2 - Zona Rural"));
+.bindPopup(crearPopup(imgs_p2, "p2", "🌳 Punto 2 - Zona Rural"));
 
-// ================= PUNTO 3 =================
+// ================= PUNTO 3 (Naturaleza - Naranja) =================
 var imgs_p3 = [
     {ruta: base + "flor1.jpg", desc: "Flor"},
     {ruta: base + "flor2.jpg", desc: "Orquídea"}
 ];
 
-L.marker([3.9708, -74.4736])
+L.marker([3.9708, -74.4736], { icon: iconoPunto3 })
 .addTo(map)
-.bindPopup(crearPopup(imgs_p3, "p3", "Punto 3 - Naturaleza"));
+.bindPopup(crearPopup(imgs_p3, "p3", "🌸 Punto 3 - Naturaleza"));
 
 // ================= CONTROL DE CAPAS BASE =================
-// Definir los mapas base disponibles
 var baseMaps = {
     "🛰️ Satélite (Esri)": sateliteLayer,
     "🗺️ Callejero (OSM)": callejeroLayer,
     "⛰️ Relieve (TopoMap)": relieveLayer
 };
 
-// Aquí se guardarán las capas vectoriales
 var overlayMaps = {};
 
 // ================= GEOJSON (CAPAS VECTORIALES) =================
@@ -210,8 +244,7 @@ fetch(vectorBase + "cabrera_cundinamarca.geojson")
             color: "#2b8cbe",
             weight: 2,
             fillOpacity: 0.25
-        },
-        name: "Límite de Cabrera"
+        }
     }).addTo(map);
     
     overlayMaps["📍 Límite de Cabrera"] = capaCabrera;
@@ -228,8 +261,7 @@ fetch(vectorBase + "reserva_campesina_cabrera.geojson")
             color: "#31a354",
             weight: 2,
             fillOpacity: 0.25
-        },
-        name: "Reserva Campesina"
+        }
     }).addTo(map);
     
     overlayMaps["🌾 Reserva Campesina"] = capaReserva;
@@ -237,21 +269,19 @@ fetch(vectorBase + "reserva_campesina_cabrera.geojson")
 })
 .catch(err => console.log("Error cargando reserva_campesina.geojson", err));
 
-// Función para añadir el control de capas cuando todo esté listo
+// Función para añadir el control de capas
 var controlAgregado = false;
 function agregarControlCapas() {
     if (!controlAgregado && Object.keys(overlayMaps).length === 2) {
-        // Control con todas las capas (mapas base + capas vectoriales)
         L.control.layers(baseMaps, overlayMaps, {
-            collapsed: false,  // false = siempre visible, true = botón desplegable
+            collapsed: false,
             position: 'topright'
         }).addTo(map);
         controlAgregado = true;
     }
 }
 
-// Mensaje opcional en consola
-console.log("✅ Mapa cargado - Usa el control en esquina superior derecha para cambiar entre satélite, callejero o relieve");
+console.log("✅ Mapa cargado - Marcadores personalizados activos");
 
 </script>
 
