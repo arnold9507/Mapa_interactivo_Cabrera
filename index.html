@@ -2,51 +2,199 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Mapa interactivo - Cabrera (Marcadores personalizados)</title>
+<title>Mapa Interactivo - Cabrera, Cundinamarca</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-#map { height: 100vh; }
+/* ================= ESTILOS GENERALES ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Contenedor principal */
+.contenedor {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+/* ================= HEADER / TÍTULO ================= */
+.header {
+    background: linear-gradient(135deg, #2b8cbe 0%, #1a5f7a 100%);
+    color: white;
+    padding: 25px 35px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.header h1 span {
+    font-size: 0.8em;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.header .subtitulo {
+    font-size: 1.1em;
+    opacity: 0.95;
+}
+
+.header .ubicacion {
+    margin-top: 12px;
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+
+/* ================= DESCRIPCIÓN ================= */
+.descripcion {
+    padding: 25px 35px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.descripcion h2 {
+    color: #2b8cbe;
+    margin-bottom: 12px;
+    font-size: 1.5em;
+}
+
+.descripcion p {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+.descripcion .datos {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.descripcion .dato {
+    background: white;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 0.85em;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.descripcion .dato strong {
+    color: #2b8cbe;
+}
+
+/* ================= CONTENEDOR DEL MAPA ================= */
+.mapa-wrapper {
+    padding: 20px 35px;
+    background: #e9ecef;
+}
+
+.mapa-wrapper .label {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+#map {
+    height: 500px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+/* ================= PIE DE PÁGINA ================= */
+.footer {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 20px 35px;
+    text-align: center;
+    font-size: 0.85em;
+}
+
+.footer p {
+    margin: 5px 0;
+}
+
+.footer a {
+    color: #2b8cbe;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
 
 /* ================= POPUP ================= */
 .popup {
-    display: inline-block;
-    text-align: center;
-    font-family: Arial;
-    padding: 12px;
-}
-
-.popup img {
-    width: 85vw;
-    max-width: 950px;
-    max-height: 75vh;
-    object-fit: contain;
-    border-radius: 14px;
     display: block;
-    margin: 0 auto;
+    text-align: center;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 12px;
+    min-width: 280px;
 }
 
 .popup h4 {
     margin: 6px 0;
     font-size: 18px;
+    color: #2b8cbe;
+}
+
+.popup img {
+    width: 100%;
+    max-width: 400px;
+    max-height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin: 10px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .popup p {
-    margin: 6px 0;
+    margin: 8px 0;
     font-size: 14px;
+    color: #555;
 }
 
-button {
-    margin: 6px;
-    padding: 6px 12px;
+.popup button {
+    margin: 8px 5px;
+    padding: 5px 15px;
     cursor: pointer;
+    background: #2b8cbe;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: background 0.3s;
 }
 
-/* ================= LEAFLET FIX ================= */
+.popup button:hover {
+    background: #1a5f7a;
+}
+
+/* ================= LEAFLET AJUSTES ================= */
 .leaflet-popup-content-wrapper {
     padding: 0 !important;
     border-radius: 14px;
+    max-width: 450px !important;
 }
 
 .leaflet-popup-content {
@@ -54,91 +202,152 @@ button {
     width: auto !important;
 }
 
-.leaflet-popup {
-    max-width: none !important;
-}
-
-/* Estilo para el control de capas */
 .leaflet-control-layers {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.leaflet-control-layers label {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 1.5em;
+    }
+    
+    .descripcion, .mapa-wrapper, .header, .footer {
+        padding: 15px 20px;
+    }
+    
+    #map {
+        height: 400px;
+    }
+    
+    .popup {
+        min-width: 250px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div id="map"></div>
+<div class="contenedor">
+    
+    <!-- HEADER / TÍTULO -->
+    <div class="header">
+        <h1>
+            🌄 Cabrera, Cundinamarca
+            <span>📍 Guía Turística Interactiva</span>
+        </h1>
+        <div class="subtitulo">
+            Descubre los encantos del municipio de Cabrera
+        </div>
+        <div class="ubicacion">
+            🗺️ Ubicado en la provincia del Sumapaz | 🌡️ Clima templado | 🏔️ Altitud: 1,300 msnm
+        </div>
+    </div>
+    
+    <!-- DESCRIPCIÓN -->
+    <div class="descripcion">
+        <h2>📖 Sobre este mapa interactivo</h2>
+        <p>
+            <strong>Cabrera</strong> es un municipio colombiano ubicado en el departamento de Cundinamarca, 
+            conocido por su belleza natural, paisajes montañosos y su rica cultura campesina. Este mapa 
+            interactivo te permite explorar algunos de los lugares más representativos del municipio, 
+            con fotografías y descripciones de cada punto de interés.
+        </p>
+        <p>
+            Haz clic en los marcadores de colores para ver las imágenes y descripciones. 
+            Puedes activar o desactivar las capas de límites municipales y reserva campesina 
+            usando el control en la esquina superior derecha del mapa. También puedes cambiar 
+            entre diferentes tipos de mapa base (Satélite, Callejero, Híbrido).
+        </p>
+        <div class="datos">
+            <div class="dato"><strong>📍 Puntos destacados:</strong> 3 lugares</div>
+            <div class="dato"><strong>📸 Fotografías:</strong> 11 imágenes</div>
+            <div class="dato"><strong>🗺️ Capas disponibles:</strong> Límite municipal + Reserva Campesina</div>
+        </div>
+    </div>
+    
+    <!-- CONTENEDOR DEL MAPA -->
+    <div class="mapa-wrapper">
+        <div class="label">🗺️ EXPLORA EL MAPA - Haz clic en los marcadores coloridos</div>
+        <div id="map"></div>
+    </div>
+    
+    <!-- FOOTER / PIE DE PÁGINA -->
+    <div class="footer">
+        <p>📌 Los puntos marcados representan lugares de interés turístico y cultural de Cabrera</p>
+        <p>📸 Las imágenes son referenciales | 🗺️ Datos geográficos: OpenStreetMap, Esri, Google Maps</p>
+        <p>🌐 Proyecto de visualización cartográfica | <a href="#">Volver arriba ↑</a></p>
+    </div>
+    
+</div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 
-// ================= MAPA BASE (SATELITAL POR DEFECTO) =================
-var map = L.map('map').setView([3.9863, -74.4834], 13);
+// ================= INICIALIZAR MAPA =================
+var map = L.map('map').setView([3.9863, -74.4834], 14);
 
-// Capa satelital (Esri World Imagery)
-var sateliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri',
-    maxZoom: 19
+// ================= MAPAS BASE =================
+// Google Satelital (principal)
+var googleSatelite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+    attribution: '&copy; Google Maps',
+    maxZoom: 22,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 }).addTo(map);
 
-// Capa callejera (OpenStreetMap)
-var callejeroLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+// Google Calles
+var googleCalles = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+    attribution: '&copy; Google Maps',
+    maxZoom: 22,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 });
 
-// Capa de relieve (OpenTopoMap)
-var relieveLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-    attribution: 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap'
+// Google Híbrido
+var googleHibrido = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    attribution: '&copy; Google Maps',
+    maxZoom: 22,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 });
 
-// ================= CENTRADO DEL POPUP =================
-map.on('popupopen', function(e) {
-    setTimeout(() => {
-        map.panTo(e.popup.getLatLng(), { animate: true });
-    }, 120);
+// OpenStreetMap
+var osmCalles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
 });
 
 // ================= CARRUSEL =================
 function crearPopup(imagenes, id, titulo) {
-
     let html = `
     <div class="popup">
         <h4>${titulo}</h4>
-
         <img id="img_${id}" src="${imagenes[0].ruta}">
         <p id="desc_${id}">${imagenes[0].desc}</p>
-
-        <button onclick="prev('${id}')">◀</button>
-        <button onclick="next('${id}')">▶</button>
-
-        <p id="count_${id}">1 / ${imagenes.length}</p>
+        <div>
+            <button onclick="prev('${id}')">◀ Anterior</button>
+            <button onclick="next('${id}')">Siguiente ▶</button>
+        </div>
+        <p id="count_${id}" style="margin-top: 8px; font-size: 12px;">1 / ${imagenes.length}</p>
     </div>
     `;
-
     window[`imgs_${id}`] = imagenes;
     window[`i_${id}`] = 0;
-
     return html;
 }
 
-// ================= UPDATE =================
 function update(id) {
     let i = window[`i_${id}`];
     let imgs = window[`imgs_${id}`];
-
     document.getElementById(`img_${id}`).src = imgs[i].ruta;
     document.getElementById(`desc_${id}`).innerText = imgs[i].desc;
     document.getElementById(`count_${id}`).innerText = (i+1) + " / " + imgs.length;
 }
 
-// ================= NEXT / PREV =================
 function next(id) {
     window[`i_${id}`] = (window[`i_${id}`] + 1) % window[`imgs_${id}`].length;
     update(id);
@@ -149,127 +358,96 @@ function prev(id) {
     update(id);
 }
 
-// ================= BASE IMÁGENES =================
+// ================= BASE DE IMÁGENES =================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 
-// ================= CREAR MARCADORES PERSONALIZADOS =================
-// Función para crear iconos personalizados
+// ================= ICONOS PERSONALIZADOS =================
 function crearIcono(color, nombre) {
     return L.divIcon({
         className: 'custom-div-icon',
-        html: `<div style="background-color: ${color}; 
-                          width: 32px; 
-                          height: 32px; 
-                          border-radius: 50%; 
-                          display: flex; 
-                          align-items: center; 
-                          justify-content: center;
-                          border: 3px solid white;
-                          box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-                          font-weight: bold;
-                          color: white;
-                          font-size: 16px;
-                          font-family: Arial;">
+        html: `<div style="background-color: ${color}; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-weight: bold; color: white; font-size: 18px; font-family: Arial;">
                     ${nombre}
                 </div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -16]
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -18]
     });
 }
 
-// Crear diferentes iconos para cada punto
-var iconoPunto1 = crearIcono('#2b8cbe', '★');  // Azul con estrella
-var iconoPunto2 = crearIcono('#31a354', '🌲');  // Verde con árbol
-var iconoPunto3 = crearIcono('#e6550d', '🌸');  // Naranja con flor
+var iconoPunto1 = crearIcono('#2b8cbe', '★');
+var iconoPunto2 = crearIcono('#31a354', '🌲');
+var iconoPunto3 = crearIcono('#e6550d', '🌸');
 
-// Opcional: Versión con números en lugar de emojis
-// var iconoPunto1 = crearIcono('#2b8cbe', '1');
-// var iconoPunto2 = crearIcono('#31a354', '2');
-// var iconoPunto3 = crearIcono('#e6550d', '3');
-
-// ================= PUNTO 1 (Centro - Azul) =================
+// ================= PUNTO 1 =================
 var imgs_p1 = [
-    {ruta: base + "cab.jpg", desc: "Parque central"},
-    {ruta: base + "monta4.jpg", desc: "Pueblo"},
-    {ruta: base + "pana.jpg", desc: "Escuela"}
+    {ruta: base + "cab.jpg", desc: "Parque central - Corazón del municipio"},
+    {ruta: base + "monta4.jpg", desc: "Vista del pueblo desde las montañas"},
+    {ruta: base + "pana.jpg", desc: "Escuela rural - Tradición educativa"}
 ];
 
 L.marker([3.9863, -74.4834], { icon: iconoPunto1 })
 .addTo(map)
-.bindPopup(crearPopup(imgs_p1, "p1", "🏙️ Punto 1 - Centro"));
+.bindPopup(crearPopup(imgs_p1, "p1", "🏙️ Parque Principal"));
 
-// ================= PUNTO 2 (Zona Rural - Verde) =================
+// ================= PUNTO 2 =================
 var imgs_p2 = [
-    {ruta: base + "monta1.jpg", desc: "Perrito"},
-    {ruta: base + "monta2.jpg", desc: "Paisaje"},
-    {ruta: base + "monta3.jpg", desc: "Insecto"},
-    {ruta: base + "monta4.jpg", desc: "Pueblo"},
-    {ruta: base + "monta5.jpg", desc: "Vereda"},
-    {ruta: base + "monta6.jpg", desc: "Río"}
+    {ruta: base + "monta1.jpg", desc: "Un amigable habitante local"},
+    {ruta: base + "monta2.jpg", desc: "Paisaje montañoso característico"},
+    {ruta: base + "monta3.jpg", desc: "Diversidad de insectos"},
+    {ruta: base + "monta4.jpg", desc: "Vista panorámica del casco urbano"},
+    {ruta: base + "monta5.jpg", desc: "Vereda típica campesina"},
+    {ruta: base + "monta6.jpg", desc: "Río cristalino - Fuente de vida"}
 ];
 
 L.marker([3.9840, -74.4884], { icon: iconoPunto2 })
 .addTo(map)
-.bindPopup(crearPopup(imgs_p2, "p2", "🌳 Punto 2 - Zona Rural"));
+.bindPopup(crearPopup(imgs_p2, "p2", "🌳 Mirador Natural"));
 
-// ================= PUNTO 3 (Naturaleza - Naranja) =================
+// ================= PUNTO 3 =================
 var imgs_p3 = [
-    {ruta: base + "flor1.jpg", desc: "Flor"},
-    {ruta: base + "flor2.jpg", desc: "Orquídea"}
+    {ruta: base + "flor1.jpg", desc: "Flor silvestre de la región"},
+    {ruta: base + "flor2.jpg", desc: "Orquídea - Especie protegida"}
 ];
 
 L.marker([3.9708, -74.4736], { icon: iconoPunto3 })
 .addTo(map)
-.bindPopup(crearPopup(imgs_p3, "p3", "🌸 Punto 3 - Naturaleza"));
+.bindPopup(crearPopup(imgs_p3, "p3", "🌸 Santuario de Flores"));
 
-// ================= CONTROL DE CAPAS BASE =================
+// ================= CAPAS DEL MAPA =================
 var baseMaps = {
-    "🛰️ Satélite (Esri)": sateliteLayer,
-    "🗺️ Callejero (OSM)": callejeroLayer,
-    "⛰️ Relieve (TopoMap)": relieveLayer
+    "🛰️ Google Satélite": googleSatelite,
+    "🗺️ Google Calles": googleCalles,
+    "🌍 Google Híbrido": googleHibrido,
+    "🗺️ OpenStreetMap": osmCalles
 };
 
 var overlayMaps = {};
 
-// ================= GEOJSON (CAPAS VECTORIALES) =================
+// ================= GEOJSON =================
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
-// --- LÍMITE DE CABRERA ---
 fetch(vectorBase + "cabrera_cundinamarca.geojson")
 .then(res => res.json())
 .then(data => {
     var capaCabrera = L.geoJSON(data, {
-        style: {
-            color: "#2b8cbe",
-            weight: 2,
-            fillOpacity: 0.25
-        }
+        style: { color: "#2b8cbe", weight: 2, fillOpacity: 0.2 }
     }).addTo(map);
-    
     overlayMaps["📍 Límite de Cabrera"] = capaCabrera;
     agregarControlCapas();
 })
-.catch(err => console.log("Error cargando cabrera.geojson", err));
+.catch(err => console.log("Error", err));
 
-// --- RESERVA CAMPESINA ---
 fetch(vectorBase + "reserva_campesina_cabrera.geojson")
 .then(res => res.json())
 .then(data => {
     var capaReserva = L.geoJSON(data, {
-        style: {
-            color: "#31a354",
-            weight: 2,
-            fillOpacity: 0.25
-        }
+        style: { color: "#31a354", weight: 2, fillOpacity: 0.2 }
     }).addTo(map);
-    
     overlayMaps["🌾 Reserva Campesina"] = capaReserva;
     agregarControlCapas();
 })
-.catch(err => console.log("Error cargando reserva_campesina.geojson", err));
+.catch(err => console.log("Error", err));
 
-// Función para añadir el control de capas
 var controlAgregado = false;
 function agregarControlCapas() {
     if (!controlAgregado && Object.keys(overlayMaps).length === 2) {
@@ -281,7 +459,7 @@ function agregarControlCapas() {
     }
 }
 
-console.log("✅ Mapa cargado - Marcadores personalizados activos");
+console.log("✅ Mapa interactivo cargado correctamente");
 
 </script>
 
