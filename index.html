@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Mapa interactivo - Cabrera</title>
+<title>Mapa interactivo - Cabrera (Satelital)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
@@ -79,15 +79,26 @@ button {
 
 <script>
 
-// ================= MAPA =================
+// ================= MAPA BASE (SATELITAL POR DEFECTO) =================
 var map = L.map('map').setView([3.9863, -74.4834], 13);
 
-// Capa base (OpenStreetMap)
-var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap'
-}).addTo(map);
+// Capa satelital (Esri World Imagery - recomendada)
+var sateliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    maxZoom: 19
+}).addTo(map);  // ← Este se añade por defecto
 
-// ================= CENTRADO =================
+// Capa callejera (OpenStreetMap)
+var callejeroLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+});
+
+// Capa de relieve (OpenTopoMap)
+var relieveLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    attribution: 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap'
+});
+
+// ================= CENTRADO DEL POPUP =================
 map.on('popupopen', function(e) {
     setTimeout(() => {
         map.panTo(e.popup.getLatLng(), { animate: true });
@@ -150,7 +161,7 @@ var imgs_p1 = [
 
 L.marker([3.9863, -74.4834])
 .addTo(map)
-.bindPopup(crearPopup(imgs_p1, "p1", "Punto 1"));
+.bindPopup(crearPopup(imgs_p1, "p1", "Punto 1 - Centro"));
 
 // ================= PUNTO 2 =================
 var imgs_p2 = [
@@ -164,7 +175,7 @@ var imgs_p2 = [
 
 L.marker([3.9840, -74.4884])
 .addTo(map)
-.bindPopup(crearPopup(imgs_p2, "p2", "Punto 2"));
+.bindPopup(crearPopup(imgs_p2, "p2", "Punto 2 - Zona Rural"));
 
 // ================= PUNTO 3 =================
 var imgs_p3 = [
@@ -174,20 +185,23 @@ var imgs_p3 = [
 
 L.marker([3.9708, -74.4736])
 .addTo(map)
-.bindPopup(crearPopup(imgs_p3, "p3", "Punto 3"));
+.bindPopup(crearPopup(imgs_p3, "p3", "Punto 3 - Naturaleza"));
 
-// ================= CONTROL DE CAPAS =================
-// Crear un objeto para guardar las capas que se puedan activar/desactivar
+// ================= CONTROL DE CAPAS BASE =================
+// Definir los mapas base disponibles
 var baseMaps = {
-    "OpenStreetMap": osmLayer
+    "🛰️ Satélite (Esri)": sateliteLayer,
+    "🗺️ Callejero (OSM)": callejeroLayer,
+    "⛰️ Relieve (TopoMap)": relieveLayer
 };
 
+// Aquí se guardarán las capas vectoriales
 var overlayMaps = {};
 
-// ================= GEOJSON =================
+// ================= GEOJSON (CAPAS VECTORIALES) =================
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
-// --- CABRERA ---
+// --- LÍMITE DE CABRERA ---
 fetch(vectorBase + "cabrera_cundinamarca.geojson")
 .then(res => res.json())
 .then(data => {
@@ -200,10 +214,7 @@ fetch(vectorBase + "cabrera_cundinamarca.geojson")
         name: "Límite de Cabrera"
     }).addTo(map);
     
-    // Agregar al control de capas
-    overlayMaps["Límite de Cabrera"] = capaCabrera;
-    
-    // Añadir el control al mapa (solo se ejecuta una vez cuando ambas capas están listas)
+    overlayMaps["📍 Límite de Cabrera"] = capaCabrera;
     agregarControlCapas();
 })
 .catch(err => console.log("Error cargando cabrera.geojson", err));
@@ -221,26 +232,26 @@ fetch(vectorBase + "reserva_campesina_cabrera.geojson")
         name: "Reserva Campesina"
     }).addTo(map);
     
-    // Agregar al control de capas
-    overlayMaps["Reserva Campesina"] = capaReserva;
-    
-    // Añadir el control al mapa
+    overlayMaps["🌾 Reserva Campesina"] = capaReserva;
     agregarControlCapas();
 })
 .catch(err => console.log("Error cargando reserva_campesina.geojson", err));
 
-// Función para añadir el control de capas solo cuando ambas capas estén cargadas
+// Función para añadir el control de capas cuando todo esté listo
 var controlAgregado = false;
 function agregarControlCapas() {
-    // Verificar que ambas capas existan (tengan al menos una propiedad)
     if (!controlAgregado && Object.keys(overlayMaps).length === 2) {
+        // Control con todas las capas (mapas base + capas vectoriales)
         L.control.layers(baseMaps, overlayMaps, {
-            collapsed: false,  // Para que se vea siempre expandido (opcional)
+            collapsed: false,  // false = siempre visible, true = botón desplegable
             position: 'topright'
         }).addTo(map);
         controlAgregado = true;
     }
 }
+
+// Mensaje opcional en consola
+console.log("✅ Mapa cargado - Usa el control en esquina superior derecha para cambiar entre satélite, callejero o relieve");
 
 </script>
 
