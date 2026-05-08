@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Mapa interactivo - Cabrera (Marcadores personalizados)</title>
+<title>Mapa interactivo - Cabrera</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
@@ -98,11 +98,40 @@ var relieveLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png
     attribution: 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap'
 });
 
-// ================= CENTRADO DEL POPUP =================
+// ================= POPUP CENTRADO EN PANTALLA =================
+// Esta función centra el popup en la pantalla cuando se abre
 map.on('popupopen', function(e) {
-    setTimeout(() => {
-        map.panTo(e.popup.getLatLng(), { animate: true });
-    }, 120);
+    // Obtener el popup y su posición en el mapa
+    var latlng = e.popup.getLatLng();
+    
+    // Calcular el offset necesario para centrar el popup en la pantalla
+    // en lugar de centrar el marcador
+    setTimeout(function() {
+        // Obtener las dimensiones del popup
+        var popupElement = document.querySelector('.leaflet-popup');
+        if (popupElement) {
+            var popupWidth = popupElement.offsetWidth;
+            var popupHeight = popupElement.offsetHeight;
+            
+            // Obtener las dimensiones del mapa
+            var mapSize = map.getSize();
+            
+            // Calcular el offset para centrar el popup
+            var offsetX = (mapSize.x / 2) - (popupWidth / 2);
+            var offsetY = (mapSize.y / 2) - (popupHeight / 2);
+            
+            // Convertir el offset a coordenadas del mapa
+            var centerPoint = map.getSize().divideBy(2);
+            var centerLatLng = map.containerPointToLatLng(centerPoint);
+            var markerPoint = map.latLngToContainerPoint(latlng);
+            
+            // Mover el mapa para que el popup quede centrado
+            var newCenterPoint = markerPoint.subtract([offsetX - (mapSize.x / 2), offsetY - (mapSize.y / 2)]);
+            var newCenter = map.containerPointToLatLng(newCenterPoint);
+            
+            map.panTo(newCenter, { animate: true });
+        }
+    }, 50);
 });
 
 // ================= CARRUSEL =================
@@ -182,11 +211,6 @@ function crearIcono(color, nombre) {
 var iconoPunto1 = crearIcono('#2b8cbe', '★');  // Azul con estrella
 var iconoPunto2 = crearIcono('#31a354', '🌲');  // Verde con árbol
 var iconoPunto3 = crearIcono('#e6550d', '🌸');  // Naranja con flor
-
-// Opcional: Versión con números en lugar de emojis
-// var iconoPunto1 = crearIcono('#2b8cbe', '1');
-// var iconoPunto2 = crearIcono('#31a354', '2');
-// var iconoPunto3 = crearIcono('#e6550d', '3');
 
 // ================= PUNTO 1 (Centro - Azul) =================
 var imgs_p1 = [
@@ -281,7 +305,7 @@ function agregarControlCapas() {
     }
 }
 
-console.log("✅ Mapa cargado - Marcadores personalizados activos");
+console.log("✅ Mapa cargado - Los popups aparecerán centrados en la pantalla");
 
 </script>
 
