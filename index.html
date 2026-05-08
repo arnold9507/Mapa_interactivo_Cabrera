@@ -43,30 +43,68 @@ button {
     cursor: pointer;
 }
 
-/* ================= LEAFLET FIX ================= */
+/* ================= POPUP CENTRADO EN PANTALLA (SIN MOVER MAPA) ================= */
+/* Esto fuerza al popup a aparecer centrado en la pantalla */
+.leaflet-popup {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 1000 !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+}
+
+/* Ocultar el popup por defecto (se muestra cuando está abierto) */
+.leaflet-popup:not(.leaflet-popup-open) {
+    display: none !important;
+}
+
+/* Ajustes para el contenido del popup */
 .leaflet-popup-content-wrapper {
     padding: 0 !important;
     border-radius: 14px;
+    width: auto !important;
+    max-width: 90vw !important;
 }
 
 .leaflet-popup-content {
     margin: 0 !important;
     width: auto !important;
+    min-width: 300px;
 }
 
-.leaflet-popup {
-    max-width: none !important;
+/* Desactivar la flecha del popup (no la necesitamos) */
+.leaflet-popup-tip {
+    display: none !important;
 }
 
 /* Estilo para el control de capas */
 .leaflet-control-layers {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 1100 !important;
 }
 
 .leaflet-control-layers label {
     font-family: Arial, sans-serif;
     font-size: 14px;
+}
+
+/* Fondo semi-transparente cuando el popup está abierto */
+.popup-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 999;
+    display: none;
+}
+
+.popup-backdrop.active {
+    display: block;
 }
 </style>
 </head>
@@ -74,6 +112,7 @@ button {
 <body>
 
 <div id="map"></div>
+<div id="popup-backdrop" class="popup-backdrop"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -98,40 +137,41 @@ var relieveLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png
     attribution: 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap'
 });
 
-// ================= POPUP CENTRADO EN PANTALLA =================
-// Esta función centra el popup en la pantalla cuando se abre
+// ================= CENTRAR POPUP SIN MOVER MAPA =================
+// Esta función fuerza el popup a centrarse sin mover el mapa
+function centrarPopupEnPantalla(popupElement) {
+    if (popupElement) {
+        // Añadir clase para mostrar el popup centrado
+        popupElement.classList.add('leaflet-popup-open');
+        
+        // Mostrar fondo oscuro
+        document.getElementById('popup-backdrop').classList.add('active');
+        
+        // Cerrar popup al hacer clic en el fondo
+        document.getElementById('popup-backdrop').onclick = function() {
+            map.closePopup();
+        };
+    }
+}
+
+// Detectar cuando se abre un popup
 map.on('popupopen', function(e) {
-    // Obtener el popup y su posición en el mapa
-    var latlng = e.popup.getLatLng();
-    
-    // Calcular el offset necesario para centrar el popup en la pantalla
-    // en lugar de centrar el marcador
+    // Esperar a que el DOM se actualice
     setTimeout(function() {
-        // Obtener las dimensiones del popup
         var popupElement = document.querySelector('.leaflet-popup');
         if (popupElement) {
-            var popupWidth = popupElement.offsetWidth;
-            var popupHeight = popupElement.offsetHeight;
-            
-            // Obtener las dimensiones del mapa
-            var mapSize = map.getSize();
-            
-            // Calcular el offset para centrar el popup
-            var offsetX = (mapSize.x / 2) - (popupWidth / 2);
-            var offsetY = (mapSize.y / 2) - (popupHeight / 2);
-            
-            // Convertir el offset a coordenadas del mapa
-            var centerPoint = map.getSize().divideBy(2);
-            var centerLatLng = map.containerPointToLatLng(centerPoint);
-            var markerPoint = map.latLngToContainerPoint(latlng);
-            
-            // Mover el mapa para que el popup quede centrado
-            var newCenterPoint = markerPoint.subtract([offsetX - (mapSize.x / 2), offsetY - (mapSize.y / 2)]);
-            var newCenter = map.containerPointToLatLng(newCenterPoint);
-            
-            map.panTo(newCenter, { animate: true });
+            centrarPopupEnPantalla(popupElement);
         }
-    }, 50);
+    }, 10);
+});
+
+// Detectar cuando se cierra un popup
+map.on('popupclose', function() {
+    var popupElement = document.querySelector('.leaflet-popup');
+    if (popupElement) {
+        popupElement.classList.remove('leaflet-popup-open');
+    }
+    document.getElementById('popup-backdrop').classList.remove('active');
 });
 
 // ================= CARRUSEL =================
@@ -139,6 +179,7 @@ function crearPopup(imagenes, id, titulo) {
 
     let html = `
     <div class="popup">
+        <button onclick="cerrarPopup()" style="position: absolute; top: 5px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
         <h4>${titulo}</h4>
 
         <img id="img_${id}" src="${imagenes[0].ruta}">
@@ -155,6 +196,11 @@ function crearPopup(imagenes, id, titulo) {
     window[`i_${id}`] = 0;
 
     return html;
+}
+
+// Función para cerrar el popup
+function cerrarPopup() {
+    map.closePopup();
 }
 
 // ================= UPDATE =================
@@ -182,7 +228,6 @@ function prev(id) {
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
 
 // ================= CREAR MARCADORES PERSONALIZADOS =================
-// Función para crear iconos personalizados
 function crearIcono(color, nombre) {
     return L.divIcon({
         className: 'custom-div-icon',
@@ -207,12 +252,11 @@ function crearIcono(color, nombre) {
     });
 }
 
-// Crear diferentes iconos para cada punto
-var iconoPunto1 = crearIcono('#2b8cbe', '★');  // Azul con estrella
-var iconoPunto2 = crearIcono('#31a354', '🌲');  // Verde con árbol
-var iconoPunto3 = crearIcono('#e6550d', '🌸');  // Naranja con flor
+var iconoPunto1 = crearIcono('#2b8cbe', '★');
+var iconoPunto2 = crearIcono('#31a354', '🌲');
+var iconoPunto3 = crearIcono('#e6550d', '🌸');
 
-// ================= PUNTO 1 (Centro - Azul) =================
+// ================= PUNTO 1 =================
 var imgs_p1 = [
     {ruta: base + "cab.jpg", desc: "Parque central"},
     {ruta: base + "monta4.jpg", desc: "Pueblo"},
@@ -223,7 +267,7 @@ L.marker([3.9863, -74.4834], { icon: iconoPunto1 })
 .addTo(map)
 .bindPopup(crearPopup(imgs_p1, "p1", "🏙️ Punto 1 - Centro"));
 
-// ================= PUNTO 2 (Zona Rural - Verde) =================
+// ================= PUNTO 2 =================
 var imgs_p2 = [
     {ruta: base + "monta1.jpg", desc: "Perrito"},
     {ruta: base + "monta2.jpg", desc: "Paisaje"},
@@ -237,7 +281,7 @@ L.marker([3.9840, -74.4884], { icon: iconoPunto2 })
 .addTo(map)
 .bindPopup(crearPopup(imgs_p2, "p2", "🌳 Punto 2 - Zona Rural"));
 
-// ================= PUNTO 3 (Naturaleza - Naranja) =================
+// ================= PUNTO 3 =================
 var imgs_p3 = [
     {ruta: base + "flor1.jpg", desc: "Flor"},
     {ruta: base + "flor2.jpg", desc: "Orquídea"}
@@ -247,7 +291,7 @@ L.marker([3.9708, -74.4736], { icon: iconoPunto3 })
 .addTo(map)
 .bindPopup(crearPopup(imgs_p3, "p3", "🌸 Punto 3 - Naturaleza"));
 
-// ================= CONTROL DE CAPAS BASE =================
+// ================= CONTROL DE CAPAS =================
 var baseMaps = {
     "🛰️ Satélite (Esri)": sateliteLayer,
     "🗺️ Callejero (OSM)": callejeroLayer,
@@ -256,44 +300,31 @@ var baseMaps = {
 
 var overlayMaps = {};
 
-// ================= GEOJSON (CAPAS VECTORIALES) =================
+// ================= GEOJSON =================
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
-// --- LÍMITE DE CABRERA ---
 fetch(vectorBase + "cabrera_cundinamarca.geojson")
 .then(res => res.json())
 .then(data => {
     var capaCabrera = L.geoJSON(data, {
-        style: {
-            color: "#2b8cbe",
-            weight: 2,
-            fillOpacity: 0.25
-        }
+        style: { color: "#2b8cbe", weight: 2, fillOpacity: 0.25 }
     }).addTo(map);
-    
     overlayMaps["📍 Límite de Cabrera"] = capaCabrera;
     agregarControlCapas();
 })
-.catch(err => console.log("Error cargando cabrera.geojson", err));
+.catch(err => console.log("Error", err));
 
-// --- RESERVA CAMPESINA ---
 fetch(vectorBase + "reserva_campesina_cabrera.geojson")
 .then(res => res.json())
 .then(data => {
     var capaReserva = L.geoJSON(data, {
-        style: {
-            color: "#31a354",
-            weight: 2,
-            fillOpacity: 0.25
-        }
+        style: { color: "#31a354", weight: 2, fillOpacity: 0.25 }
     }).addTo(map);
-    
     overlayMaps["🌾 Reserva Campesina"] = capaReserva;
     agregarControlCapas();
 })
-.catch(err => console.log("Error cargando reserva_campesina.geojson", err));
+.catch(err => console.log("Error", err));
 
-// Función para añadir el control de capas
 var controlAgregado = false;
 function agregarControlCapas() {
     if (!controlAgregado && Object.keys(overlayMaps).length === 2) {
@@ -305,7 +336,7 @@ function agregarControlCapas() {
     }
 }
 
-console.log("✅ Mapa cargado - Los popups aparecerán centrados en la pantalla");
+console.log("✅ Mapa listo - El mapa NO se mueve, el popup aparece centrado");
 
 </script>
 
