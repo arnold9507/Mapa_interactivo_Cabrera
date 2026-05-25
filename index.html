@@ -29,6 +29,32 @@ body {
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     overflow: hidden;
+    position: relative;
+}
+
+/* ================= LOGO SUPERIOR IZQUIERDA ================= */
+.logo-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    backdrop-filter: blur(5px);
+    border: 2px solid rgba(43, 140, 190, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.logo-container:hover {
+    transform: scale(1.05);
+}
+
+.logo-container img {
+    max-height: 60px;
+    width: auto;
+    display: block;
 }
 
 /* ================= HEADER / TÍTULO ================= */
@@ -240,6 +266,16 @@ body {
         padding: 10px;
     }
     
+    .logo-container {
+        top: 10px;
+        left: 10px;
+        padding: 5px 8px;
+    }
+    
+    .logo-container img {
+        max-height: 40px;
+    }
+    
     .header h1 {
         font-size: 1.5em;
     }
@@ -267,6 +303,11 @@ body {
 <body>
 
 <div class="contenedor">
+    
+    <!-- LOGO SUPERIOR IZQUIERDA -->
+    <div class="logo-container">
+        <img src="https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/LogoZRC.png" alt="Logo Zona de Reserva Campesina">
+    </div>
     
     <!-- HEADER / TÍTULO -->
     <div class="header">
