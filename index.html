@@ -190,6 +190,19 @@ body {
     background: #1a5f7a;
 }
 
+/* ================= ESTILOS PARA AUDIO EN POPUP ================= */
+.popup audio {
+    width: 100%;
+    margin: 10px 0;
+    border-radius: 30px;
+}
+
+.popup .audio-info {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
 /* ================= LEAFLET AJUSTES ================= */
 .leaflet-popup-content-wrapper {
     padding: 0 !important;
@@ -266,8 +279,9 @@ body {
             entre diferentes tipos de mapa base (Satélite, Callejero, Híbrido).
         </p>
         <div class="datos">
-            <div class="dato"><strong>📍 Puntos destacados:</strong> 3 lugares</div>
+            <div class="dato"><strong>📍 Puntos destacados:</strong> 3 lugares + 1 punto adicional disponible</div>
             <div class="dato"><strong>📸 Fotografías:</strong> 11 imágenes</div>
+            <div class="dato"><strong>🎵 Contenido de audio:</strong> 1 pista disponible</div>
             <div class="dato"><strong>🗺️ Capas disponibles:</strong> Límite municipal + Reserva Campesina</div>
         </div>
     </div>
@@ -281,7 +295,8 @@ body {
     <!-- FOOTER / PIE DE PÁGINA -->
     <div class="footer">
     <p>📌 Los puntos marcados representan lugares de interés turístico y cultural de Cabrera</p>
-    <p>📸 Las imágenes son referenciales | 🗺️ Datos geográficos: OpenStreetMap, Esri, Google Maps</p>
+    <p>📸 Las imágenes son referenciales | 🎵 Audios representativos del folclor local</p>
+    <p>🗺️ Datos geográficos: OpenStreetMap, Esri, Google Maps</p>
     <p>
         <a href="mapa-solo.html" target="_blank" style="display: inline-block; background: #2b8cbe; color: white; padding: 8px 20px; border-radius: 25px; text-decoration: none; margin-top: 10px;">
             🗺️ Ver mapa en pantalla completa → Abrir en nueva ventana
@@ -380,8 +395,101 @@ function crearIcono(color, nombre) {
 var iconoPunto1 = crearIcono('#2b8cbe', '★');
 var iconoPunto2 = crearIcono('#31a354', '🌲');
 var iconoPunto3 = crearIcono('#e6550d', '🌸');
+var iconoAudio = crearIcono('#9b59b6', '🎵'); // Icono para puntos de audio
 
-// ================= PUNTO 1 =================
+// ============================================================================
+// ================= SECCIÓN 1: AGREGAR NUEVO PUNTO CON IMÁGENES ==============
+// ============================================================================
+// INSTRUCCIONES:
+// 1. Define las imágenes para tu nuevo punto en el siguiente arreglo
+// 2. Copia las rutas de las imágenes que quieras usar
+// 3. Descomenta el bloque L.marker
+// 4. Ajusta las coordenadas, título y el ícono según prefieras
+// ============================================================================
+
+/*
+// --- EJEMPLO: Nuevo punto de interés "Cascada Escondida" ---
+var imgs_nuevo_punto = [
+    {ruta: base + "cascada1.jpg", desc: "Vista principal de la cascada"},
+    {ruta: base + "cascada2.jpg", desc: "Piscinas naturales al pie de la cascada"},
+    {ruta: base + "cascada3.jpg", desc: "Sendero ecológico hacia la cascada"},
+    {ruta: base + "cascada4.jpg", desc: "Aves típicas de la zona"}
+];
+
+// Crea un ícono personalizado para el nuevo punto (puedes usar uno existente o crear uno nuevo)
+var iconoNuevoPunto = crearIcono('#f39c12', '💧'); // Color ámbar con gota de agua
+
+// Agrega el marcador al mapa (descomenta las siguientes líneas)
+// L.marker([3.9765, -74.4795], { icon: iconoNuevoPunto })
+// .addTo(map)
+// .bindPopup(crearPopup(imgs_nuevo_punto, "nuevo_punto", "💧 Cascada Escondida - Tesoro Natural"));
+*/
+
+// ============================================================================
+// ================= SECCIÓN 2: AGREGAR APARTADO DE AUDIO =====================
+// ============================================================================
+// INSTRUCCIONES:
+// 1. Define el archivo de audio con su ruta, descripción y duración
+// 2. Define las coordenadas donde aparecerá el marcador de audio
+// 3. Descomenta el bloque L.marker para el audio
+// 4. Personaliza el título y la descripción del audio
+// ============================================================================
+
+// Función especializada para crear popups con reproductor de audio
+function crearPopupAudio(audioInfo, id, titulo) {
+    let html = `
+    <div class="popup">
+        <h4>${titulo}</h4>
+        <audio controls>
+            <source src="${audioInfo.ruta}" type="audio/mpeg">
+            Tu navegador no soporta el elemento de audio.
+        </audio>
+        <p style="margin: 10px 0 5px 0;">${audioInfo.desc}</p>
+        <div class="audio-info">
+            🎵 Duración: ${audioInfo.duracion} | 📍 Punto de interés sonoro
+        </div>
+    </div>
+    `;
+    return html;
+}
+
+
+// --- EJEMPLO: Audio "Canto de los campesinos" ---
+var audio_tradicional = {
+    ruta: base + "audios/himno.mp3",   // Ruta del archivo de audio
+    desc: "Himno de Cabrera",
+    duracion: "3:24"
+};
+
+// Coordenadas para el punto de audio
+var coordenadasAudio = [3.9820, -74.4860]; // Cerca del parque principal
+
+// Crea un ícono especial para el audio
+var iconoAudioPunto = crearIcono('#9b59b6', '🎵');
+
+// Agrega el marcador de audio al mapa (descomenta las siguientes líneas)
+L.marker(coordenadasAudio, { icon: iconoAudioPunto })
+ .addTo(map)
+ .bindPopup(crearPopupAudio(audio_tradicional, "audio_campesino", "🎶 Canto Campesino Tradicional"));
+
+// ============================================================================
+// ================= COORDENADAS DE REFERENCIA PARA NUEVOS PUNTOS =============
+// ============================================================================
+// 
+// COORDENADAS ÚTILES DEL ÁREA DE CABRERA:
+// 
+// Centro del pueblo: [3.9863, -74.4834]
+// Zona norte (veredas altas): [3.9950, -74.4880]
+// Zona sur (río): [3.9750, -74.4800]
+// Zona este (montañas): [3.9900, -74.4750]
+// Zona oeste (miradores): [3.9820, -74.4920]
+// Vereda El Hato: [3.9780, -74.4850]
+// Vereda El Placer: [3.9970, -74.4900]
+// Zona del río Cabrera: [3.9710, -74.4790]
+// 
+// ============================================================================
+
+// ================= PUNTO 1 (EXISTENTE) =================
 var imgs_p1 = [
     {ruta: base + "cab.jpg", desc: "Parque central - Corazón del municipio"},
     {ruta: base + "monta4.jpg", desc: "Vista del pueblo desde las montañas"},
@@ -392,7 +500,7 @@ L.marker([3.9863, -74.4834], { icon: iconoPunto1 })
 .addTo(map)
 .bindPopup(crearPopup(imgs_p1, "p1", "🏙️ Parque Principal"));
 
-// ================= PUNTO 2 =================
+// ================= PUNTO 2 (EXISTENTE) =================
 var imgs_p2 = [
     {ruta: base + "monta1.jpg", desc: "Un amigable habitante local"},
     {ruta: base + "monta2.jpg", desc: "Paisaje montañoso característico"},
@@ -406,7 +514,7 @@ L.marker([3.9840, -74.4884], { icon: iconoPunto2 })
 .addTo(map)
 .bindPopup(crearPopup(imgs_p2, "p2", "🌳 Mirador Natural"));
 
-// ================= PUNTO 3 =================
+// ================= PUNTO 3 (EXISTENTE) =================
 var imgs_p3 = [
     {ruta: base + "flor1.jpg", desc: "Flor silvestre de la región"},
     {ruta: base + "flor2.jpg", desc: "Orquídea - Especie protegida"}
@@ -415,6 +523,39 @@ var imgs_p3 = [
 L.marker([3.9708, -74.4736], { icon: iconoPunto3 })
 .addTo(map)
 .bindPopup(crearPopup(imgs_p3, "p3", "🌸 Santuario de Flores"));
+
+// ============================================================================
+// ================= AQUÍ PUEDES AGREGAR MÁS PUNTOS CON IMÁGENES ==============
+// ============================================================================
+// COPIA Y PEGA ESTE BLOQUE PARA CADA NUEVO PUNTO:
+//
+// var imgs_nuevo_punto_X = [
+//     {ruta: base + "nombre_imagen1.jpg", desc: "Descripción 1"},
+//     {ruta: base + "nombre_imagen2.jpg", desc: "Descripción 2"}
+// ];
+// 
+// var iconoNuevo = crearIcono('#COLOR_HEX', 'SÍMBOLO');
+// 
+// L.marker([LATITUD, LONGITUD], { icon: iconoNuevo })
+// .addTo(map)
+// .bindPopup(crearPopup(imgs_nuevo_punto_X, "id_unico", "🏷️ Título del Lugar"));
+// ============================================================================
+
+// ============================================================================
+// ================= AQUÍ PUEDES AGREGAR MÁS PUNTOS DE AUDIO ==================
+// ============================================================================
+// COPIA Y PEGA ESTE BLOQUE PARA CADA NUEVO AUDIO:
+//
+// var audio_nuevo = {
+//     ruta: base + "audios/nombre_archivo.mp3",
+//     desc: "Descripción detallada del audio y su significado cultural",
+//     duracion: "MM:SS"
+// };
+// 
+// L.marker([LATITUD, LONGITUD], { icon: iconoAudioPunto })
+// .addTo(map)
+// .bindPopup(crearPopupAudio(audio_nuevo, "id_unico_audio", "🎵 Título del Audio"));
+// ============================================================================
 
 // ================= CAPAS DEL MAPA =================
 var baseMaps = {
@@ -438,7 +579,7 @@ fetch(vectorBase + "cabrera_cundinamarca.geojson")
     overlayMaps["📍 Límite de Cabrera"] = capaCabrera;
     agregarControlCapas();
 })
-.catch(err => console.log("Error", err));
+.catch(err => console.log("Error cargando límite de Cabrera:", err));
 
 fetch(vectorBase + "reserva_campesina_cabrera.geojson")
 .then(res => res.json())
@@ -449,7 +590,7 @@ fetch(vectorBase + "reserva_campesina_cabrera.geojson")
     overlayMaps["🌾 Reserva Campesina"] = capaReserva;
     agregarControlCapas();
 })
-.catch(err => console.log("Error", err));
+.catch(err => console.log("Error cargando reserva campesina:", err));
 
 var controlAgregado = false;
 function agregarControlCapas() {
@@ -463,6 +604,7 @@ function agregarControlCapas() {
 }
 
 console.log("✅ Mapa interactivo cargado correctamente");
+console.log("💡 TIP: Descomenta las secciones comentadas para agregar nuevos puntos con imágenes y contenido de audio");
 
 </script>
 
