@@ -293,16 +293,15 @@ body {
         </p>
         <p>
             Haz clic en los marcadores de colores para ver las imágenes y descripciones. 
-            Puedes activar o desactivar las capas de veredas y reserva campesina 
-            usando el control en la esquina superior derecha del mapa. También puedes cambiar 
-            entre diferentes tipos de mapa base (Satélite, Callejero, Híbrido).
+            Puedes activar o desactivar las capas de veredas usando el control en la esquina superior derecha del mapa. 
+            También puedes cambiar entre diferentes tipos de mapa base (Satélite, Callejero, Híbrido).
             <strong>📍 Pasa el mouse sobre cada vereda para ver su nombre.</strong>
         </p>
         <div class="datos">
             <div class="dato"><strong>📍 Puntos destacados:</strong> 3 lugares + puntos adicionales disponibles</div>
             <div class="dato"><strong>📸 Fotografías:</strong> 11 imágenes</div>
             <div class="dato"><strong>🎵 Contenido de audio:</strong> Himno de Cabrera disponible</div>
-            <div class="dato"><strong>🗺️ Capas disponibles:</strong> Veredas de Cabrera + Reserva Campesina</div>
+            <div class="dato"><strong>🗺️ Capas disponibles:</strong> Veredas de Cabrera</div>
         </div>
     </div>
     
@@ -638,31 +637,6 @@ fetch(vectorBase + "cabrera_veredas.geojson")
     }
 })
 .catch(err => console.log("Error cargando veredas de Cabrera:", err));
-
-// Cargar capa de reserva campesina
-fetch(vectorBase + "reserva_campesina_cabrera.geojson")
-.then(res => res.json())
-.then(data => {
-    var capaReserva = L.geoJSON(data, {
-        style: {
-            color: "#31a354",
-            weight: 2,
-            fillColor: "#a8e6a8",
-            fillOpacity: 0.25
-        }
-    }).addTo(map);
-    
-    overlayMaps["🌾 Reserva Campesina"] = capaReserva;
-    
-    if (controlAgregado === false && Object.keys(overlayMaps).length >= 1) {
-        L.control.layers(baseMaps, overlayMaps, {
-            collapsed: false,
-            position: 'topright'
-        }).addTo(map);
-        controlAgregado = true;
-    }
-})
-.catch(err => console.log("Error cargando reserva campesina:", err));
 
 var controlAgregado = false;
 
