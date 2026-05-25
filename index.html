@@ -299,9 +299,9 @@ body {
             <strong>📍 Pasa el mouse sobre cada vereda para ver su nombre.</strong>
         </p>
         <div class="datos">
-            <div class="dato"><strong>📍 Puntos destacados:</strong> 3 lugares + 1 punto adicional disponible</div>
+            <div class="dato"><strong>📍 Puntos destacados:</strong> 3 lugares + puntos adicionales disponibles</div>
             <div class="dato"><strong>📸 Fotografías:</strong> 11 imágenes</div>
-            <div class="dato"><strong>🎵 Contenido de audio:</strong> 1 pista disponible</div>
+            <div class="dato"><strong>🎵 Contenido de audio:</strong> Himno de Cabrera disponible</div>
             <div class="dato"><strong>🗺️ Capas disponibles:</strong> Veredas de Cabrera + Reserva Campesina</div>
         </div>
     </div>
@@ -398,6 +398,7 @@ function prev(id) {
 
 // ================= BASE DE IMÁGENES =================
 const base = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/documentos_interactivos/";
+const baseAudio = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/";
 
 // ================= ICONOS PERSONALIZADOS =================
 function crearIcono(color, nombre) {
@@ -416,6 +417,24 @@ var iconoPunto1 = crearIcono('#2b8cbe', '★');
 var iconoPunto2 = crearIcono('#31a354', '🌲');
 var iconoPunto3 = crearIcono('#e6550d', '🌸');
 var iconoAudio = crearIcono('#9b59b6', '🎵');
+
+// Función especializada para crear popups con reproductor de audio
+function crearPopupAudio(audioInfo, id, titulo) {
+    let html = `
+    <div class="popup">
+        <h4>${titulo}</h4>
+        <audio controls>
+            <source src="${audioInfo.ruta}" type="audio/mpeg">
+            Tu navegador no soporta el elemento de audio.
+        </audio>
+        <p style="margin: 10px 0 5px 0;">${audioInfo.desc}</p>
+        <div class="audio-info">
+            🎵 Duración: ${audioInfo.duracion} | 📍 Punto de interés sonoro
+        </div>
+    </div>
+    `;
+    return html;
+}
 
 // ================= PUNTO 1 (EXISTENTE) =================
 var imgs_p1 = [
@@ -452,6 +471,126 @@ L.marker([3.9708, -74.4736], { icon: iconoPunto3 })
 .addTo(map)
 .bindPopup(crearPopup(imgs_p3, "p3", "🌸 Santuario de Flores"));
 
+
+// ============================================================================
+// ================= INSTRUCCIONES PARA AGREGAR NUEVOS PUNTOS =================
+// ============================================================================
+// 
+// Para agregar un nuevo punto con IMÁGENES (carrusel):
+// ------------------------------------------------
+// 1. Define las imágenes en un arreglo (puedes usar 1, 2, 3 o más imágenes):
+//    
+//    var imgs_mi_lugar = [
+//        {ruta: base + "nombre_imagen1.jpg", desc: "Descripción de la imagen 1"},
+//        {ruta: base + "nombre_imagen2.jpg", desc: "Descripción de la imagen 2"},
+//        {ruta: base + "nombre_imagen3.jpg", desc: "Descripción de la imagen 3"}
+//    ];
+//
+// 2. Crea un ícono personalizado (elige color y símbolo):
+//    
+//    var iconoMiLugar = crearIcono('#COLOR_HEX', 'SÍMBOLO');
+//    Ejemplos de colores: '#f39c12' (naranja), '#e74c3c' (rojo), '#8e44ad' (morado)
+//    Ejemplos de símbolos: '⛰️', '💧', '🏞️', '⛪', '🏛️'
+//
+// 3. Agrega el marcador al mapa con sus coordenadas:
+//    
+//    L.marker([LATITUD, LONGITUD], { icon: iconoMiLugar })
+//    .addTo(map)
+//    .bindPopup(crearPopup(imgs_mi_lugar, "id_unico_mi_lugar", "🏷️ Título del Lugar"));
+//
+// NOTA: El "id_unico_mi_lugar" debe ser diferente para cada punto (ej: "mirador_2", "cascada")
+//
+// Coordenadas de referencia en Cabrera:
+// - Centro del pueblo: [3.9863, -74.4834]
+// - Zona norte: [3.9950, -74.4880]
+// - Zona sur (río): [3.9750, -74.4800]
+// - Zona este (montañas): [3.9900, -74.4750]
+// - Zona oeste (miradores): [3.9820, -74.4920]
+// - Vereda El Hato: [3.9780, -74.4850]
+// - Vereda El Placer: [3.9970, -74.4900]
+// - Zona del río Cabrera: [3.9710, -74.4790]
+//
+// ============================================================================
+// ================= EJEMPLO DE NUEVO PUNTO CON IMÁGENES ======================
+// ============================================================================
+// (Copia, pega y descomenta este bloque para agregar un nuevo punto)
+/*
+var imgs_mirador_alto = [
+    {ruta: base + "mirador1.jpg", desc: "Vista panorámica del valle"},
+    {ruta: base + "mirador2.jpg", desc: "Atardecer desde el mirador"},
+    {ruta: base + "mirador3.jpg", desc: "Vegetación nativa alrededor"}
+];
+
+var iconoMirador = crearIcono('#f39c12', '⛰️');
+
+L.marker([3.9920, -74.4850], { icon: iconoMirador })
+.addTo(map)
+.bindPopup(crearPopup(imgs_mirador_alto, "mirador_alto", "⛰️ Mirador Alto - Vista del Valle"));
+*/
+// ============================================================================
+
+
+// ============================================================================
+// ================= INSTRUCCIONES PARA AGREGAR PUNTO DE AUDIO ================
+// ============================================================================
+// 
+// Para agregar un nuevo punto con AUDIO (reproductor MP3):
+// ------------------------------------------------
+// 1. Define la información del audio en un objeto:
+//    
+//    var audio_nombre = {
+//        ruta: baseAudio + "audios/nombre_del_archivo.mp3",   // Ruta al archivo MP3
+//        desc: "Descripción detallada del contenido del audio",  // Explicación del audio
+//        duracion: "MM:SS"    // Duración en minutos:segundos (ej: "2:35")
+//    };
+//
+// 2. Define las coordenadas donde aparecerá el marcador de audio:
+//    
+//    var coordenadasAudio = [LATITUD, LONGITUD];
+//
+// 3. Agrega el marcador de audio al mapa:
+//    
+//    L.marker(coordenadasAudio, { icon: iconoAudio })
+//    .addTo(map)
+//    .bindPopup(crearPopupAudio(audio_nombre, "id_unico_audio", "🎵 Título del Audio"));
+//
+// NOTA: La variable "iconoAudio" ya está definida arriba con el ícono morado con 🎵
+//
+// ============================================================================
+// ================= EJEMPLO CON EL HIMNO DE CABRERA ==========================
+// ============================================================================
+// (Copia, pega y descomenta este bloque para agregar el himno de Cabrera)
+
+var himnoCabrera = {
+    ruta: baseAudio + "audios/himno.mp3",
+    desc: "Himno oficial del municipio de Cabrera, Cundinamarca. Una composición que resalta la belleza natural, el orgullo campesino y la tradición cultural de la región del Sumapaz.",
+    duracion: "3:45"
+};
+
+var coordenadasHimno = [3.9863, -74.4834];  // Parque principal
+
+L.marker(coordenadasHimno, { icon: iconoAudio })
+.addTo(map)
+.bindPopup(crearPopupAudio(himnoCabrera, "himno_cabrera", "🎵 Himno de Cabrera"));
+
+// ============================================================================
+// ================= AGREGAR MÁS PUNTOS DE AUDIO AQUÍ =========================
+// ============================================================================
+// Copia y pega este bloque para cada audio adicional:
+/*
+var audio_nuevo = {
+    ruta: baseAudio + "audios/otro_audio.mp3",
+    desc: "Descripción del audio adicional",
+    duracion: "2:30"
+};
+
+L.marker([3.9820, -74.4860], { icon: iconoAudio })
+.addTo(map)
+.bindPopup(crearPopupAudio(audio_nuevo, "audio_nuevo_id", "🎵 Título del Nuevo Audio"));
+*/
+// ============================================================================
+
+
 // ================= CAPAS DEL MAPA =================
 var baseMaps = {
     "🛰️ Google Satélite": googleSatelite,
@@ -463,7 +602,6 @@ var baseMaps = {
 var overlayMaps = {};
 
 // ================= GEOJSON - VEREDAS DE CABRERA =================
-// Se reemplaza el límite municipal de Cabrera por las veredas
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
 // Cargar capa de veredas de Cabrera
@@ -471,17 +609,14 @@ fetch(vectorBase + "cabrera_veredas.geojson")
 .then(res => res.json())
 .then(data => {
     var capaVeredas = L.geoJSON(data, {
-        // Estilo de cada vereda
         style: {
             color: "#2b8cbe",
             weight: 2,
             fillColor: "#8fc9e6",
             fillOpacity: 0.3
         },
-        // Función para agregar tooltip con el nombre de la vereda (columna NOMBRE_VER)
         onEachFeature: function(feature, layer) {
             if (feature.properties && feature.properties.NOMBRE_VER) {
-                // Agregar tooltip que aparece al pasar el mouse
                 layer.bindTooltip(feature.properties.NOMBRE_VER, {
                     permanent: false,
                     direction: 'center',
@@ -492,10 +627,8 @@ fetch(vectorBase + "cabrera_veredas.geojson")
         }
     }).addTo(map);
     
-    // Agregar la capa de veredas al control de capas
     overlayMaps["🗺️ Veredas de Cabrera"] = capaVeredas;
     
-    // Agregar control de capas si la reserva ya está cargada
     if (controlAgregado === false && Object.keys(overlayMaps).length >= 1) {
         L.control.layers(baseMaps, overlayMaps, {
             collapsed: false,
@@ -521,7 +654,6 @@ fetch(vectorBase + "reserva_campesina_cabrera.geojson")
     
     overlayMaps["🌾 Reserva Campesina"] = capaReserva;
     
-    // Agregar control de capas si las veredas ya están cargadas
     if (controlAgregado === false && Object.keys(overlayMaps).length >= 1) {
         L.control.layers(baseMaps, overlayMaps, {
             collapsed: false,
@@ -536,7 +668,8 @@ var controlAgregado = false;
 
 console.log("✅ Mapa interactivo cargado correctamente");
 console.log("💡 Las veredas de Cabrera se muestran con tooltips que aparecen al pasar el mouse");
-console.log("💡 Descomenta las secciones comentadas para agregar nuevos puntos con imágenes y contenido de audio");
+console.log("💡 El himno de Cabrera está disponible en el marcador 🎵 del parque principal");
+console.log("💡 Para agregar más puntos, sigue las instrucciones comentadas en el código");
 
 </script>
 
