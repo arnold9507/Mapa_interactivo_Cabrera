@@ -434,28 +434,45 @@ var iconoNuevoPunto = crearIcono('#f39c12', '💧'); // Color ámbar con gota de
 // 3. Descomenta el bloque L.marker para el audio
 // 4. Personaliza el título y la descripción del audio
 // ============================================================================
-    
-// --- Versión de prueba con verificación de errores ---
+
+// Función especializada para crear popups con reproductor de audio
+function crearPopupAudio(audioInfo, id, titulo) {
+    let html = `
+    <div class="popup">
+        <h4>${titulo}</h4>
+        <audio controls>
+            <source src="${audioInfo.ruta}" type="audio/mpeg">
+            Tu navegador no soporta el elemento de audio.
+        </audio>
+        <p style="margin: 10px 0 5px 0;">${audioInfo.desc}</p>
+        <div class="audio-info">
+            🎵 Duración: ${audioInfo.duracion} | 📍 Punto de interés sonoro
+        </div>
+    </div>
+    `;
+    return html;
+}
+
+/*
+// --- EJEMPLO: Audio "Canto de los campesinos" ---
 var audio_tradicional = {
-    // CAMBIA ESTA URL por una que SEPA que funciona
-    ruta: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    desc: "🎵 Canción de prueba - Reemplazar con el himno oficial de Cabrera cuando esté disponible",
-    duracion: "1:00"
+    ruta: base + "audios/canto_campesino.mp3",   // Ruta del archivo de audio
+    desc: "Grabación tradicional del canto campesino de la región de Cabrera, interpretado por lugareños durante las festividades de la cosecha.",
+    duracion: "3:24"
 };
 
 // Coordenadas para el punto de audio
-var coordenadasAudio = [3.9820, -74.4860];
+var coordenadasAudio = [3.9820, -74.4860]; // Cerca del parque principal
 
 // Crea un ícono especial para el audio
 var iconoAudioPunto = crearIcono('#9b59b6', '🎵');
 
-// Agrega el marcador de audio al mapa
-L.marker(coordenadasAudio, { icon: iconoAudioPunto })
- .addTo(map)
- .bindPopup(crearPopupAudio(audio_tradicional, "audio_campesino", "🎶 Canto Campesino Tradicional"))
- .on('click', function() {
-     console.log("🎵 Marcador de audio clickeado - Verifica la consola para errores");
- });
+// Agrega el marcador de audio al mapa (descomenta las siguientes líneas)
+// L.marker(coordenadasAudio, { icon: iconoAudioPunto })
+// .addTo(map)
+// .bindPopup(crearPopupAudio(audio_tradicional, "audio_campesino", "🎶 Canto Campesino Tradicional"));
+*/
+
 // ============================================================================
 // ================= COORDENADAS DE REFERENCIA PARA NUEVOS PUNTOS =============
 // ============================================================================
