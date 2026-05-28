@@ -345,7 +345,7 @@ body {
         </p>
         <p>
             Haz clic en los marcadores de colores para ver las imágenes y descripciones. 
-            Puedes activar o desactivar las capas de veredas usando el control en la esquina superior derecha del mapa. 
+            Puedes activar o desactivar las capas de veredas y cursos de agua usando el control en la esquina superior derecha del mapa. 
             También puedes cambiar entre diferentes tipos de mapa base (Satélite, Callejero, Híbrido).
             <strong>📍 Pasa el mouse sobre cada vereda para ver su nombre.</strong>
         </p>
@@ -354,7 +354,7 @@ body {
             <div class="dato"><strong>📸 Fotografías:</strong> 11 imágenes</div>
             <div class="dato"><strong>🎵 Contenido de audio:</strong> Himno de Cabrera disponible</div>
             <div class="dato"><strong>🎥 Contenido de video:</strong> Avistamiento de Oso Andino</div>
-            <div class="dato"><strong>🗺️ Capas disponibles:</strong> Veredas de Cabrera</div>
+            <div class="dato"><strong>🗺️ Capas disponibles:</strong> Veredas y Cursos de agua (ríos)</div>
         </div>
     </div>
     
@@ -368,7 +368,7 @@ body {
     <div class="footer">
     <p>📌 Los puntos marcados representan lugares de interés turístico y cultural de Cabrera</p>
     <p>📸 Las imágenes son referenciales | 🎵 Audios representativos del folclor local | 🎥 Videos de fauna y naturaleza</p>
-    <p>🗺️ Datos geográficos: OpenStreetMap, Esri, Google Maps | 🗺️ Veredas: Cabrera</p>
+    <p>🗺️ Datos geográficos: OpenStreetMap, Esri, Google Maps | 🗺️ Veredas y ríos: Cabrera</p>
     <p>
         <a href="mapa-solo.html" target="_blank" style="display: inline-block; background: #2b8cbe; color: white; padding: 8px 20px; border-radius: 25px; text-decoration: none; margin-top: 10px;">
             🗺️ Ver mapa en pantalla completa → Abrir en nueva ventana
@@ -546,81 +546,12 @@ L.marker([3.9708, -74.4736], { icon: iconoPunto3 })
 var videoOso = {
     ruta: base + "VideoOso.mp4",
     desc: "Oso Andino (Tremarctos ornatus) transitando por el corredor biológico de la Zona de Reserva Campesina de Cabrera. Esta especie es el jardinero de los bosques y es indicador de la conservación del Bosque Alto Andino",
-  
+    duracion: "1:30"
 };
 
 L.marker([3.905618293938581, -74.51483176447742], { icon: iconoVideo })
 .addTo(map)
 .bindPopup(crearPopupVideo(videoOso, "video_oso", "🐻 Avistamiento de Oso Andino"));
-
-
-// ============================================================================
-// ================= INSTRUCCIONES PARA AGREGAR NUEVOS PUNTOS =================
-// ============================================================================
-// 
-// Para agregar un nuevo punto con IMÁGENES (carrusel):
-// ------------------------------------------------
-// 1. Define las imágenes en un arreglo (puedes usar 1, 2, 3 o más imágenes):
-//    
-//    var imgs_mi_lugar = [
-//        {ruta: base + "nombre_imagen1.jpg", desc: "Descripción de la imagen 1"},
-//        {ruta: base + "nombre_imagen2.jpg", desc: "Descripción de la imagen 2"},
-//        {ruta: base + "nombre_imagen3.jpg", desc: "Descripción de la imagen 3"}
-//    ];
-//
-// 2. Crea un ícono personalizado (elige color y símbolo):
-//    
-//    var iconoMiLugar = crearIcono('#COLOR_HEX', 'SÍMBOLO');
-//    Ejemplos de colores: '#f39c12' (naranja), '#e74c3c' (rojo), '#8e44ad' (morado)
-//    Ejemplos de símbolos: '⛰️', '💧', '🏞️', '⛪', '🏛️'
-//
-// 3. Agrega el marcador al mapa con sus coordenadas:
-//    
-//    L.marker([LATITUD, LONGITUD], { icon: iconoMiLugar })
-//    .addTo(map)
-//    .bindPopup(crearPopup(imgs_mi_lugar, "id_unico_mi_lugar", "🏷️ Título del Lugar"));
-//
-// NOTA: El "id_unico_mi_lugar" debe ser diferente para cada punto (ej: "mirador_2", "cascada")
-//
-// ============================================================================
-// ================= INSTRUCCIONES PARA AGREGAR PUNTO DE VIDEO ================
-// ============================================================================
-// 
-// Para agregar un nuevo punto con VIDEO:
-// ------------------------------------------------
-// 1. Define la información del video en un objeto:
-//    
-//    var video_nombre = {
-//        ruta: base + "nombre_del_video.mp4",   // Ruta al archivo MP4
-//        desc: "Descripción detallada del contenido del video",
-//        duracion: "MM:SS"    // Duración en minutos:segundos (ej: "2:35")
-//    };
-//
-// 2. Crea un ícono para el video (puedes usar el existente iconoVideo o crear uno nuevo):
-//    
-//    var iconoVideoPersonal = crearIcono('#COLOR_HEX', '🐻');
-//
-// 3. Agrega el marcador de video al mapa:
-//    
-//    L.marker([LATITUD, LONGITUD], { icon: iconoVideo })
-//    .addTo(map)
-//    .bindPopup(crearPopupVideo(video_nombre, "id_unico_video", "🎥 Título del Video"));
-//
-// ============================================================================
-
-// ================= EJEMPLO CON EL HIMNO DE CABRERA ==========================
-var himnoCabrera = {
-    ruta: baseAudio + "audios/himno.mp3",
-    desc: "Himno oficial del municipio de Cabrera, Cundinamarca. Una composición que resalta la belleza natural, el orgullo campesino y la tradición cultural de la región del Sumapaz.",
-    duracion: "3:45"
-};
-
-var coordenadasHimno = [3.9863, -74.4834];  // Parque principal
-
-L.marker(coordenadasHimno, { icon: iconoAudio })
-.addTo(map)
-.bindPopup(crearPopupAudio(himnoCabrera, "himno_cabrera", "🎵 Himno de Cabrera"));
-
 
 // ================= CAPAS DEL MAPA =================
 var baseMaps = {
@@ -635,16 +566,16 @@ var overlayMaps = {};
 // ================= GEOJSON - VEREDAS DE CABRERA =================
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
 
-// Cargar capa de veredas de Cabrera
+// Cargar capa de veredas de Cabrera (borde negro, relleno transparente)
 fetch(vectorBase + "cabrera_veredas.geojson")
 .then(res => res.json())
 .then(data => {
     var capaVeredas = L.geoJSON(data, {
         style: {
-            color: "#2b8cbe",
-            weight: 2,
-            fillColor: "#8fc9e6",
-            fillOpacity: 0.3
+            color: "black",        // Borde negro
+            weight: 2,             // Grosor del borde
+            fillColor: "black",    // Color de relleno (no afecta por opacity)
+            fillOpacity: 0         // Relleno transparente
         },
         onEachFeature: function(feature, layer) {
             if (feature.properties && feature.properties.NOMBRE_VER) {
@@ -670,10 +601,36 @@ fetch(vectorBase + "cabrera_veredas.geojson")
 })
 .catch(err => console.log("Error cargando veredas de Cabrera:", err));
 
+// ================= NUEVO: WATERWAYS_CABRERA.GEOJSON (RÍOS AZULES) =================
+fetch(vectorBase + "waterways_cabrera.geojson")
+.then(res => res.json())
+.then(data => {
+    var capaRios = L.geoJSON(data, {
+        style: {
+            color: "#0066cc",      // Color azul para los ríos
+            weight: 2,             // Grosor de la línea
+            opacity: 0.8,          // Opacidad de la línea
+            smoothFactor: 1        // Suavizado de la geometría
+        }
+    }).addTo(map);
+    
+    overlayMaps["💧 Cursos de agua (Ríos)"] = capaRios;
+    
+    if (controlAgregado === false && Object.keys(overlayMaps).length >= 1) {
+        L.control.layers(baseMaps, overlayMaps, {
+            collapsed: false,
+            position: 'topright'
+        }).addTo(map);
+        controlAgregado = true;
+    }
+})
+.catch(err => console.log("Error cargando waterways_cabrera.geojson:", err));
+
 var controlAgregado = false;
 
 console.log("✅ Mapa interactivo cargado correctamente");
 console.log("💡 Las veredas de Cabrera se muestran con tooltips que aparecen al pasar el mouse");
+console.log("💡 Los ríos se muestran en color azul");
 console.log("💡 El himno de Cabrera está disponible en el marcador 🎵 del parque principal");
 console.log("🎥 Nuevo punto de video: Avistamiento de Oso Andino en coordenadas 3.905618, -74.514832");
 console.log("💡 Para agregar más puntos, sigue las instrucciones comentadas en el código");
