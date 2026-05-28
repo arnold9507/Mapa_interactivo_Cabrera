@@ -272,6 +272,19 @@ body {
     white-space: nowrap;
 }
 
+/* Estilo para tooltip de ríos */
+.rio-tooltip {
+    background-color: rgba(0,102,204,0.85);
+    border: 1px solid #003366;
+    border-radius: 6px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 10px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    white-space: nowrap;
+}
+
 /* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
     body {
@@ -345,22 +358,22 @@ body {
         </p>
         <p>
             Haz clic en los marcadores de colores para ver las imágenes y descripciones. 
-            Puedes activar o desactivar las capas de veredas y cursos de agua usando el control en la esquina superior derecha del mapa. 
+            Puedes activar o desactivar las capas de veredas, ríos y caminos usando el control en la esquina superior derecha del mapa. 
             También puedes cambiar entre diferentes tipos de mapa base (Satélite, Callejero, Híbrido).
-            <strong>📍 Pasa el mouse sobre cada vereda para ver su nombre.</strong>
+            <strong>📍 Pasa el mouse sobre cada vereda o río para ver su nombre.</strong>
         </p>
         <div class="datos">
             <div class="dato"><strong>📍 Puntos destacados:</strong> 4 lugares + puntos adicionales disponibles</div>
             <div class="dato"><strong>📸 Fotografías:</strong> 11 imágenes</div>
             <div class="dato"><strong>🎵 Contenido de audio:</strong> Himno de Cabrera disponible</div>
             <div class="dato"><strong>🎥 Contenido de video:</strong> Avistamiento de Oso Andino</div>
-            <div class="dato"><strong>🗺️ Capas disponibles:</strong> Veredas y Cursos de agua (ríos)</div>
+            <div class="dato"><strong>🗺️ Capas disponibles:</strong> Veredas, Ríos y Caminos</div>
         </div>
     </div>
     
     <!-- CONTENEDOR DEL MAPA -->
     <div class="mapa-wrapper">
-        <div class="label">🗺️ EXPLORA EL MAPA - Haz clic en los marcadores coloridos | Pasa el mouse sobre las veredas</div>
+        <div class="label">🗺️ EXPLORA EL MAPA - Haz clic en los marcadores coloridos | Pasa el mouse sobre las veredas y ríos</div>
         <div id="map"></div>
     </div>
     
@@ -368,7 +381,7 @@ body {
     <div class="footer">
     <p>📌 Los puntos marcados representan lugares de interés turístico y cultural de Cabrera</p>
     <p>📸 Las imágenes son referenciales | 🎵 Audios representativos del folclor local | 🎥 Videos de fauna y naturaleza</p>
-    <p>🗺️ Datos geográficos: OpenStreetMap, Esri, Google Maps | 🗺️ Veredas y ríos: Cabrera</p>
+    <p>🗺️ Datos geográficos: OpenStreetMap, Esri, Google Maps | 🗺️ Veredas, ríos y caminos: Cabrera</p>
     <p>
         <a href="mapa-solo.html" target="_blank" style="display: inline-block; background: #2b8cbe; color: white; padding: 8px 20px; border-radius: 25px; text-decoration: none; margin-top: 10px;">
             🗺️ Ver mapa en pantalla completa → Abrir en nueva ventana
@@ -562,6 +575,7 @@ var baseMaps = {
 };
 
 var overlayMaps = {};
+var controlAgregado = false;
 
 // ================= GEOJSON - VEREDAS DE CABRERA =================
 const vectorBase = "https://arnold9507.github.io/Mapa_interactivo_Cabrera/vectorial/";
@@ -601,20 +615,57 @@ fetch(vectorBase + "cabrera_veredas.geojson")
 })
 .catch(err => console.log("Error cargando veredas de Cabrera:", err));
 
-// ================= NUEVO: WATERWAYS_CABRERA.GEOJSON (RÍOS AZULES) =================
-fetch(vectorBase + "waterways_cabrera.geojson")
+// ================= RÍOS CABRERA (AZUL) - NUEVO ARCHIVO AGREGADO =================
+fetch(vectorBase + "rios_cabrera.geojson")
 .then(res => res.json())
 .then(data => {
-    var capaRios = L.geoJSON(data, {
+    console.log("✅ Archivo rios_cabrera.geojson cargado correctamente");
+    console.log("📊 Cantidad de elementos en la capa de ríos:", data.features ? data.features.length : 0);
+    
+    var capaRiosCabrera = L.geoJSON(data, {
         style: {
-            color: "#0066cc",      // Color azul para los ríos
-            weight: 2,             // Grosor de la línea
-            opacity: 0.8,          // Opacidad de la línea
+            color: "#0066ff",      // Color azul vibrante para los ríos
+            weight: 3,             // Grosor de la línea más visible
+            opacity: 0.9,          // Opacidad de la línea
             smoothFactor: 1        // Suavizado de la geometría
+        },
+        onEachFeature: function(feature, layer) {
+            // Agregar tooltip con nombre del río si existe
+            if (feature.properties) {
+                // Buscar posible nombre del río en diferentes propiedades
+                var nombreRio = feature.properties.nombre || 
+                               feature.properties.NOMBRE || 
+                               feature.properties.name ||
+                               feature.properties.NOMBRE_RIO ||
+                               feature.properties.RIO ||
+                               "Río";
+                
+                // Si el nombre es genérico o no existe, intentar identificar por otros campos
+                if (nombreRio === "Río" || !nombreRio) {
+                    if (feature.properties.NAM) nombreRio = feature.properties.NAM;
+                    else if (feature.properties.FULLNAME) nombreRio = feature.properties.FULLNAME;
+                    else if (feature.properties.waterway) nombreRio = feature.properties.waterway;
+                }
+                
+                layer.bindTooltip("💧 " + nombreRio, {
+                    permanent: false,
+                    direction: 'center',
+                    className: 'rio-tooltip',
+                    sticky: true,
+                    offset: [0, 0]
+                });
+            } else {
+                layer.bindTooltip("💧 Curso de agua", {
+                    permanent: false,
+                    direction: 'center',
+                    className: 'rio-tooltip',
+                    sticky: true
+                });
+            }
         }
     }).addTo(map);
     
-    overlayMaps["💧 Cursos de agua (Ríos)"] = capaRios;
+    overlayMaps["💧 Ríos de Cabrera (Azul)"] = capaRiosCabrera;
     
     if (controlAgregado === false && Object.keys(overlayMaps).length >= 1) {
         L.control.layers(baseMaps, overlayMaps, {
@@ -624,15 +675,71 @@ fetch(vectorBase + "waterways_cabrera.geojson")
         controlAgregado = true;
     }
 })
-.catch(err => console.log("Error cargando waterways_cabrera.geojson:", err));
+.catch(err => {
+    console.error("❌ Error cargando rios_cabrera.geojson:", err);
+    console.warn("💡 Verifica que el archivo 'rios_cabrera.geojson' existe en la carpeta vectorial/");
+    console.warm("📁 Ruta esperada:", vectorBase + "rios_cabrera.geojson");
+});
 
-var controlAgregado = false;
+// ================= CAMINOS CABRERA (OPCIONAL) =================
+// Cargar capa de caminos si existe
+fetch(vectorBase + "caminos_cabrera.geojson")
+.then(res => {
+    if (res.ok) {
+        return res.json();
+    } else {
+        throw new Error("Archivo caminos_cabrera.geojson no encontrado");
+    }
+})
+.then(data => {
+    console.log("✅ Archivo caminos_cabrera.geojson cargado correctamente (opcional)");
+    
+    var capaCaminos = L.geoJSON(data, {
+        style: {
+            color: "#ff6600",      // Color naranja para caminos
+            weight: 2,             // Grosor de la línea
+            opacity: 0.8,
+            dashArray: "5, 5"      // Línea punteada para distinguir de ríos
+        },
+        onEachFeature: function(feature, layer) {
+            if (feature.properties) {
+                var nombreCamino = feature.properties.nombre || 
+                                  feature.properties.NAM ||
+                                  feature.properties.name ||
+                                  "Camino";
+                layer.bindTooltip("🟠 " + nombreCamino, {
+                    permanent: false,
+                    direction: 'center',
+                    className: 'rio-tooltip',
+                    sticky: true
+                });
+            }
+        }
+    }).addTo(map);
+    
+    overlayMaps["🟠 Caminos de Cabrera"] = capaCaminos;
+    
+    // Actualizar el control de capas si ya existe
+    if (controlAgregado) {
+        map.removeControl(map.controlLayers);
+        map.controlLayers = L.control.layers(baseMaps, overlayMaps, {
+            collapsed: false,
+            position: 'topright'
+        }).addTo(map);
+    }
+})
+.catch(err => {
+    // No mostrar error si el archivo no existe (es opcional)
+    console.log("ℹ️ Archivo caminos_cabrera.geojson no disponible (opcional)");
+});
 
 console.log("✅ Mapa interactivo cargado correctamente");
 console.log("💡 Las veredas de Cabrera se muestran con tooltips que aparecen al pasar el mouse");
-console.log("💡 Los ríos se muestran en color azul");
+console.log("💧 Los ríos de Cabrera se muestran en color AZUL (archivo: rios_cabrera.geojson)");
+console.log("💡 Los caminos se muestran en color naranja punteado (si el archivo existe)");
 console.log("💡 El himno de Cabrera está disponible en el marcador 🎵 del parque principal");
 console.log("🎥 Nuevo punto de video: Avistamiento de Oso Andino en coordenadas 3.905618, -74.514832");
+console.log("📁 Carpeta vectorial:", vectorBase);
 console.log("💡 Para agregar más puntos, sigue las instrucciones comentadas en el código");
 
 </script>
