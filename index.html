@@ -355,7 +355,7 @@ body {
 <script>
 
 // ================= INICIALIZAR MAPA =================
-var map = L.map('map').setView([3.9756, -74.4797], 16);
+var map = L.map('map').setView([3.9756, -74.4797], 10);
 
 // ================= MAPAS BASE =================
 var googleSatelite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -582,23 +582,6 @@ console.log("✅ Mapa completamente cargado");
 console.log("📍 Los dos puntos de interés están visibles en el mapa");
 console.log("📸 Si las imágenes no cargan, verifica que la carpeta P16junio existe en:");
 console.log("   " + base);
-
-// Verificar si las imágenes existen (solo para depuración)
-function verificarImagen(url) {
-    fetch(url, { method: 'HEAD' })
-        .then(res => {
-            if (res.ok) {
-                console.log("✅ Imagen encontrada:", url);
-            } else {
-                console.log("❌ Imagen NO encontrada:", url);
-            }
-        })
-        .catch(err => console.log("❌ Error verificando imagen:", url, err));
-}
-
-// Verificar algunas imágenes
-verificarImagen(base + "Vueltalucha/P1Vueltalucha1.JPG");
-verificarImagen(base + "Frijolchocho/P2Frijolchocho1.JPG");
 
 </script>
 
