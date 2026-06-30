@@ -481,9 +481,6 @@ var markerFrijol = L.marker([3.976, -74.475], { icon: iconoFrijol })
     .addTo(map)
     .bindPopup(crearPopupSimple(imagenFrijol, "🌱 Frijol Chocho", "Cultivo tradicional de frijol chocho en la región de Cabrera"));
 
-console.log("✅ Marcadores agregados:");
-console.log("  🏔️ La Vuelta de la Lucha en:", markerVuelta.getLatLng());
-console.log("  🌱 Frijol Chocho en:", markerFrijol.getLatLng());
 
 // ================= PUNTO 3: ANTIGUO TELECOM =================
 // Coordenadas: 3°58'32.136''N 74°28'46.746''W
@@ -501,6 +498,10 @@ var markerTele = L.marker([3.9725933, -74.4726517], { icon: iconoTele })
     .addTo(map)
     .bindPopup(crearPopupCarrusel(imagenesTele, "vuelta", "📞 Antiguo telecom"));
 
+console.log("✅ Marcadores agregados:");
+console.log("  🏔️ La Vuelta de la Lucha en:", markerVuelta.getLatLng());
+console.log("  🌱 Frijol Chocho en:", markerFrijol.getLatLng());
+console.log("  📞 Antiguo telecom en:", markerTele.getLatLng());
 
 // ================= CAPAS DEL MAPA =================
 var baseMaps = {
