@@ -355,7 +355,7 @@ body {
 <script>
 
 // ================= INICIALIZAR MAPA =================
-var map = L.map('map').setView([3.9756, -74.4797], 10);
+var map = L.map('map').setView([3.9756, -74.4797], 8);
 
 // ================= MAPAS BASE =================
 var googleSatelite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -484,6 +484,23 @@ var markerFrijol = L.marker([3.976, -74.475], { icon: iconoFrijol })
 console.log("✅ Marcadores agregados:");
 console.log("  🏔️ La Vuelta de la Lucha en:", markerVuelta.getLatLng());
 console.log("  🌱 Frijol Chocho en:", markerFrijol.getLatLng());
+
+// ================= PUNTO 3: ANTIGUO TELECOM =================
+// Coordenadas: 3°58'32.136''N 74°28'46.746''W
+// Decimal: 3.9755933, -74.4796517
+var iconoTele = crearIcono('#8e44ad', '📞');
+
+var imagenesTele = [
+    {ruta: base + "Antiguotelecom/P5Antiguatelecom1.JPG", desc: "Telecom 1"},
+    {ruta: base + "Antiguotelecom/P5Antiguatelecom2.JPG", desc: "telecom 2"},
+];
+
+console.log("📸 Ruta de imágenes de Telecom:", base + "Antiguotelecom/");
+
+var markerTele = L.marker([3.9725933, -74.4726517], { icon: iconoTele })
+    .addTo(map)
+    .bindPopup(crearPopupCarrusel(imagenesTele, "vuelta", "📞 Antiguo telecom"));
+
 
 // ================= CAPAS DEL MAPA =================
 var baseMaps = {
