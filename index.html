@@ -355,7 +355,8 @@ body {
 <script>
 
 // ================= INICIALIZAR MAPA =================
-var map = L.map('map').setView([3.9756, -74.4797], 8);
+// CAMBIO 1: Zoom inicial cambiado de 8 a 14 (más cercano)
+var map = L.map('map').setView([3.9756, -74.4797], 14);
 
 // ================= MAPAS BASE =================
 var googleSatelite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -496,7 +497,7 @@ console.log("📸 Ruta de imágenes de Telecom:", base + "Antiguotelecom/");
 
 var markerTele = L.marker([3.9725933, -74.4726517], { icon: iconoTele })
     .addTo(map)
-    .bindPopup(crearPopupCarrusel(imagenesTele, "vuelta", "📞 Antiguo telecom"));
+    .bindPopup(crearPopupCarrusel(imagenesTele, "telecom", "📞 Antiguo telecom"));
     
 // ================= Añadir puntos =================
 
@@ -514,14 +515,21 @@ var baseMaps = {
 };
 
 var overlayMaps = {};
-var controlAgregado = false;
 
 // ================= GEOJSON - VEREDAS =================
 const vectorBase = "https://corcunpaz.github.io/Mapa-Interactivo-Quebrada-Negra-/vectorial/";
 
+// CAMBIO 2: Asegurar que el control de capas se muestre correctamente
+// Crear el control de capas ANTES de cargar los datos
+var controlLayers = L.control.layers(baseMaps, {}, {
+    collapsed: false,
+    position: 'topright'
+}).addTo(map);
+
 fetch(vectorBase + "cabrera_veredas.geojson")
 .then(res => res.json())
 .then(data => {
+    console.log("✅ Veredas cargadas correctamente");
     var capaVeredas = L.geoJSON(data, {
         style: {
             color: "black",
@@ -541,17 +549,10 @@ fetch(vectorBase + "cabrera_veredas.geojson")
         }
     }).addTo(map);
     
-    overlayMaps["🗺️ Veredas de Cabrera"] = capaVeredas;
-    
-    if (controlAgregado === false && Object.keys(overlayMaps).length >= 1) {
-        L.control.layers(baseMaps, overlayMaps, {
-            collapsed: false,
-            position: 'topright'
-        }).addTo(map);
-        controlAgregado = true;
-    }
+    // Añadir la capa al control
+    controlLayers.addOverlay(capaVeredas, "🗺️ Veredas de Cabrera");
 })
-.catch(err => console.log("Error cargando veredas:", err));
+.catch(err => console.error("Error cargando veredas:", err));
 
 // ================= GEOJSON - RÍOS =================
 fetch(vectorBase + "rios_cabrera.geojson")
@@ -582,26 +583,23 @@ fetch(vectorBase + "rios_cabrera.geojson")
         }
     }).addTo(map);
     
-    overlayMaps["💧 Ríos de Cabrera"] = capaRios;
-    
-    if (controlAgregado === false && Object.keys(overlayMaps).length >= 1) {
-        L.control.layers(baseMaps, overlayMaps, {
-            collapsed: false,
-            position: 'topright'
-        }).addTo(map);
-        controlAgregado = true;
-    }
+    // Añadir la capa al control
+    controlLayers.addOverlay(capaRios, "💧 Ríos de Cabrera");
 })
 .catch(err => console.error("Error cargando ríos:", err));
 
-// ================= ZOOM A LOS PUNTOS =================
-var grupoPuntos = L.featureGroup([markerVuelta, markerFrijol]).addTo(map);
-map.fitBounds(grupoPuntos.getBounds(), { padding: [50, 50] });
+// CAMBIO 3: Eliminar el zoom a los puntos para mantener el zoom inicial en 14
+// Ya no se usa fitBounds para que el zoom se mantenga en 14
 
-console.log("✅ Mapa completamente cargado");
-console.log("📍 Los dos puntos de interés están visibles en el mapa");
-console.log("📸 Si las imágenes no cargan, verifica que la carpeta P16junio existe en:");
-console.log("   " + base);
+// CAMBIO 4: Asegurar que el control de capas sea visible desde el inicio
+console.log("✅ Control de capas agregado correctamente");
+console.log("📌 Para ver las capas, usa el control en la esquina superior derecha");
+
+// CAMBIO 5: Mensaje de ayuda en consola
+console.log("💡 TIPS:");
+console.log("  - Usa el control en la esquina superior derecha para activar/desactivar capas");
+console.log("  - El zoom inicial es 14 (más cercano)");
+console.log("  - Haz clic en los marcadores para ver las imágenes");
 
 </script>
 
